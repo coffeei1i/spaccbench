@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use SpaCCBench, please cite the following paper."
+title: "SpaCCBench enables four-dimensional benchmarking of spatial cell-cell communication inference across diverse biological scenarios"
+authors:
+  - family-names: Xie
+    given-names: Xiaolan
+version: 0.1.0
+date-released: 2026-05-20
+license: MIT
+repository-code: "https://github.com/coffeei1i/spaccbench"
+preferred-citation:
+  type: article
+  title: "SpaCCBench enables four-dimensional benchmarking of spatial cell-cell communication inference across diverse biological scenarios"
+  authors:
+    - family-names: Xie
+      given-names: Xiaolan
+  year: 2026
+  notes: "Manuscript in preparation."

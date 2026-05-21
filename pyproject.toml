@@ -1,0 +1,87 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "spaccbench"
+version = "0.1.0"
+description = "Four-dimensional benchmark for spatial cell-cell communication inference"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [
+    { name = "Xiaolan Xie" },
+]
+keywords = [
+    "spatial-transcriptomics",
+    "cell-cell-communication",
+    "benchmark",
+    "ligand-receptor",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+]
+dependencies = [
+    "numpy>=1.23",
+    "pandas>=1.5",
+    "scipy>=1.10",
+    "scikit-learn>=1.2",
+    "anndata>=0.9",
+    "scanpy>=1.9",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "ruff>=0.1",
+]
+pathway = [
+    "decoupler>=1.5",
+]
+all = [
+    "spaccbench[dev,pathway]",
+]
+
+[project.urls]
+Homepage = "https://github.com/coffeei1i/spaccbench"
+Repository = "https://github.com/coffeei1i/spaccbench"
+Issues = "https://github.com/coffeei1i/spaccbench/issues"
+
+[project.scripts]
+spaccbench = "spaccbench.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["spaccbench*"]
+
+[tool.setuptools.package-data]
+spaccbench = [
+    "data/*.csv",
+    "data/*.tsv",
+    "data/*.h5ad",
+    "data/*.gmt",
+    "data/*.parquet",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+addopts = "-v --tb=short"
