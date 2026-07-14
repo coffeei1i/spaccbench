@@ -11,7 +11,7 @@ def _run_cli(*args, expect_zero=True):
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
     if expect_zero and result.returncode != 0:
         raise AssertionError(
-            f"Command {cmd} failed (exit {result.returncode}).\n"
+            f"Command {cmd} returned exit {result.returncode}.\n"
             f"STDOUT:\n{result.stdout}\nSTDERR:\n{result.stderr}"
         )
     return result
@@ -27,8 +27,8 @@ def test_cli_list_methods():
     assert "LIANA" in out.stdout
     assert "COMMOT" in out.stdout
     assert "Spacia" in out.stdout
-    assert "bundled" in out.stdout
-    assert "stub" in out.stdout
+    assert "reference" in out.stdout
+    assert "companion" in out.stdout
 
 
 def test_cli_list_scenarios():
@@ -57,11 +57,17 @@ def test_cli_help_runs():
     assert "list-methods" in result.stdout
 
 
-def test_cli_evaluate_without_data_fails_cleanly():
-    """Without bundled data, `evaluate` should fail with a clear error,
-    not a stack trace from deep in pandas."""
+def test_cli_evaluate_guides_score_generation():
+    """The CLI provides a clear score-generation message."""
     result = _run_cli("evaluate", "--method", "LIANA", "--scenario", "tha",
                       expect_zero=False)
     assert result.returncode != 0
     combined = result.stdout + result.stderr
-    assert any(token in combined for token in ["not bundled", "build_adapter_scores"])
+    assert "build_scenario.py" in combined or "build_adapter_scores" in combined
+
+
+def test_cli_list_methods_is_ascii_and_reports_current_status_terms():
+    out = _run_cli("list-methods")
+    out.stdout.encode("ascii")
+    assert "reference" in out.stdout
+    assert "companion" in out.stdout

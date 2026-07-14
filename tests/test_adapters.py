@@ -11,7 +11,7 @@ from spaccbench.adapters import (
     get_adapter,
     list_methods,
 )
-from spaccbench.adapters._stubs import STUB_METHODS
+from spaccbench.adapters._stubs import COMPANION_METHODS
 
 
 def test_reference_adapters_registered():
@@ -21,17 +21,17 @@ def test_reference_adapters_registered():
     assert isinstance(REFERENCE_ADAPTERS["COMMOT"], COMMOTAdapter)
 
 
-def test_all_eight_stubs_registered():
-    for m in STUB_METHODS:
+def test_all_eight_companion_methods_registered():
+    for m in COMPANION_METHODS:
         assert m in ALL_ADAPTERS
 
 
 def test_list_methods_status_counts():
     rows = list_methods()
-    bundled = [r for r in rows if r["status"] == "bundled"]
-    stub = [r for r in rows if r["status"] == "stub"]
+    bundled = [r for r in rows if r["status"] == "reference"]
+    companion = [r for r in rows if r["status"] == "companion"]
     assert len(bundled) == 2
-    assert len(stub) == len(STUB_METHODS)
+    assert len(companion) == len(COMPANION_METHODS)
 
 
 def test_get_adapter_case_insensitive():
@@ -46,7 +46,7 @@ def test_get_adapter_unknown_raises():
         get_adapter("NotAMethod")
 
 
-def test_stub_raises_not_implemented():
+def test_companion_adapter_points_to_adapter_workflow():
     spacia = get_adapter("Spacia")
     with pytest.raises(NotImplementedError) as exc:
         spacia.load_scores("tha")
@@ -70,12 +70,24 @@ def test_baseadapter_cannot_be_instantiated_directly():
         BaseAdapter()
 
 
-def test_reference_adapter_missing_data_raises_friendly_error():
-    """Without bundled data files, load_scores should raise FileNotFoundError
-    with a helpful message pointing to the build script."""
+def test_reference_adapter_guides_score_generation():
+    """The reference adapter message points to the score-generation script."""
     adapter = LIANAAdapter()
     with pytest.raises(FileNotFoundError) as exc:
         adapter.load_scores("tha")
     msg = str(exc.value)
     assert "liana_tha_scores" in msg
     assert "tools/build_adapter_scores.py" in msg
+
+def test_reference_adapter_loads_external_scores(tmp_path, monkeypatch):
+    scores = pd.DataFrame(
+        {"Lig1_Rec1": [1.0, 2.0]},
+        index=["cell1", "cell2"],
+    )
+    scores.to_csv(tmp_path / "liana_tha_scores.csv")
+    monkeypatch.setenv("SPACCBENCH_DATA_DIR", str(tmp_path))
+
+    loaded = LIANAAdapter().load_scores("tha")
+
+    assert list(loaded.columns) == ["lig1-rec1"]
+    assert loaded.shape == (2, 1)

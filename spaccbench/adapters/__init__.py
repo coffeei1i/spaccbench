@@ -1,10 +1,10 @@
 """Method adapters.
 
-Reference adapters with bundled pre-computed scores:
+Reference adapters with standardized score-file templates:
     - LIANA (LIANAAdapter)
     - COMMOT (COMMOTAdapter)
 
-Stub adapters (raise NotImplementedError when load_scores is called):
+Companion-output adapters:
     - Spacia, StereoSiTE, SPIDER, stLearn, LARIS, CellAgentChat, stCASE, SpaCcLink
 
 User-supplied adapters should subclass ``BaseAdapter``.
@@ -12,7 +12,7 @@ User-supplied adapters should subclass ``BaseAdapter``.
 from __future__ import annotations
 
 from spaccbench.adapters._csv_backed import CsvBackedAdapter
-from spaccbench.adapters._stubs import STUB_METHODS, make_stub_registry
+from spaccbench.adapters._stubs import COMPANION_METHODS, make_companion_registry
 from spaccbench.adapters.base import BaseAdapter
 from spaccbench.adapters.commot import COMMOTAdapter
 from spaccbench.adapters.liana import LIANAAdapter
@@ -25,7 +25,7 @@ REFERENCE_ADAPTERS: dict[str, BaseAdapter] = {
 
 ALL_ADAPTERS: dict[str, BaseAdapter] = {
     **REFERENCE_ADAPTERS,
-    **make_stub_registry(),
+    **make_companion_registry(),
 }
 
 
@@ -41,10 +41,10 @@ def get_adapter(name: str) -> BaseAdapter:
 
 
 def list_methods() -> list[dict[str, str]]:
-    """Return method metadata (name, status: bundled/stub)."""
+    """Return method metadata (name, status: reference/companion)."""
     rows = []
     for k in ALL_ADAPTERS:
-        status = "bundled" if k in REFERENCE_ADAPTERS else "stub"
+        status = "reference" if k in REFERENCE_ADAPTERS else "companion"
         rows.append({"name": k, "status": status})
     return rows
 
@@ -56,7 +56,7 @@ __all__ = [
     "COMMOTAdapter",
     "REFERENCE_ADAPTERS",
     "ALL_ADAPTERS",
-    "STUB_METHODS",
+    "COMPANION_METHODS",
     "get_adapter",
     "list_methods",
 ]

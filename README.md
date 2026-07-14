@@ -1,129 +1,141 @@
-# SpaCCBench
+# SpaCCBench: a scenario-aware four-dimensional benchmark for spatial cell-cell communication
 
 [![CI](https://github.com/coffeei1i/spaccbench/actions/workflows/ci.yml/badge.svg)](https://github.com/coffeei1i/spaccbench/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**A four-dimensional benchmark for spatial cell-cell communication (CCC) inference.**
+SpaCCBench evaluates spatial cell-cell communication inference methods along
+four complementary dimensions: candidate-pair recovery (D1), expression
+fidelity (D2), spatial coherence (D3), and receptor-pathway concordance (D4).
+It provides a common adapter interface, species-stratified ligand-receptor
+resources, and a reproducible workflow for harmonized cell-by-LR score
+matrices.
 
-SpaCCBench evaluates spatial CCC methods along four orthogonal axes — detection
-accuracy (D1), expression fidelity (D2), spatial structure coherence (D3) and
-downstream pathway activation (D4) — on a common per-sample top-25 ligand-receptor
-list drawn from a unified, species-stratified LR database (8,234 mouse / 7,056
-human pairs merged from the native resources of 10 contemporary methods).
+## Installation
+
+~~~bash
+pip install git+https://github.com/coffeei1i/spaccbench.git
+~~~
+
+SpaCCBench requires Python 3.9 or newer.
 
 ## Quickstart
 
-```bash
-pip install git+https://github.com/coffeei1i/spaccbench.git
-```
+The unified ligand-receptor resources are packaged with the repository and work
+without downloading a spatial dataset:
 
-```python
-from spaccbench import evaluate
+~~~python
+from spaccbench import load_lr_db
 
-result = evaluate(method="LIANA", scenario="tha")
-print(f"D1 hit rate     : {result['d1']['fraction']:.2%}")
-print(f"D2 Pearson r    : {result['d2']['pearson_r']:.3f}")
-print(f"D3 Moran's I    : {result['d3']['morans_i']:.3f}")
-print(f"D4 mean AUC     : {result['d4']['mean_auc']:.3f}  (p_perm={result['d4']['perm_p']:.3g})")
-```
+mouse_lr = load_lr_db("mouse")
+human_lr = load_lr_db("human")
 
-Or from the command line:
-```bash
+print(mouse_lr.shape)  # (8234, 4)
+print(human_lr.shape)  # (7056, 4)
+print(mouse_lr.head())
+~~~
+
+Each table contains ligand, receptor, n_sources, and sources. The mouse resource
+contains 8,234 pairs and is the resource used by the manuscript benchmark.
+
+## Running a benchmark
+
+Large prepared scenario files are intentionally kept outside Git. Put the
+scenario files in one directory and set SPACCBENCH_DATA_DIR before evaluation:
+
+~~~bash
+export SPACCBENCH_DATA_DIR=/path/to/prepared_scenarios
 spaccbench list-methods
 spaccbench list-scenarios
 spaccbench evaluate --method LIANA --scenario tha
-spaccbench evaluate --method LIANA --scenario tha --output result.json
-```
+~~~
 
-## Evaluate your own method
+On Windows PowerShell:
 
-Subclass `BaseAdapter` and return a cells × LR score matrix:
+~~~powershell
+$env:SPACCBENCH_DATA_DIR = "D:\path\to\prepared_scenarios"
+spaccbench list-scenarios
+~~~
 
-```python
+The THA and CTX scenario definitions expect an AnnData file, an
+expression-informed LR candidate table, an expression-derived reference
+matrix, and a pathway-activity matrix. The benchmark uses 25 candidates per
+sample as a fixed algorithmic setting. See docs/data_access.md for source
+datasets and tools/build_scenario.py for preparation.
+
+## Four-dimensional framework
+
+| Dimension | Primary metric | Evaluation question |
+|---|---|---|
+| D1 | Candidate-pair recovery | Does a method emit non-trivial scores for the expression-informed candidates? |
+| D2 | Pearson correlation | Do per-cell method scores agree with the expression-derived reference signal? |
+| D3 | Moran's I | Are inferred communication scores spatially coherent? |
+| D4 | Mean AUC | Do detected interactions track receptor-associated pathway activity? |
+
+A cohort-level geometric composite summarizes rank-normalized D1-D4 scores
+while penalizing uneven performance across dimensions.
+
+## Evaluating another method
+
+A method adapter returns a cells-by-LR pandas DataFrame:
+
+~~~python
 import pandas as pd
 from spaccbench import BaseAdapter, evaluate
 
+
 class MyMethodAdapter(BaseAdapter):
     name = "MyMethod"
+
     def __init__(self, scores_path):
         self.scores_path = scores_path
+
     def load_scores(self, scenario):
-        # Return DataFrame: rows = cell barcodes, cols = "ligand-receptor" lowercased.
         return pd.read_csv(self.scores_path, index_col=0)
 
-result = evaluate(method=MyMethodAdapter("my_outputs/tha.csv"), scenario="tha")
-print(result["composite_geo"])
-```
 
-See [`docs/extending.md`](docs/extending.md) for the full guide.
+result = evaluate(
+    method=MyMethodAdapter("my_outputs/tha.csv"),
+    scenario="tha",
+)
+~~~
 
-## Bundled scenarios
+See docs/extending.md for the adapter contract and
+docs/output_harmonization.md for the common score-matrix format.
 
-| Scenario | Platform | Cells | Species | Notes |
-|---|---|---|---|---|
-| `tha` | MERFISH | 9,773 | mouse | Hypothalamus |
-| `ctx` | MERFISH | 9,943 | mouse | Cortico-striatal coronal section |
+## Reproducing the manuscript benchmark
 
-Pre-computed cell × LR matrices for **LIANA** and **COMMOT** ship with the
-package. The remaining 8 methods evaluated in the paper (Spacia, StereoSiTE,
-SPIDER, stLearn, LARIS, CellAgentChat, stCASE, SpaCcLink) appear as stub
-adapters — pre-computed scores are available at the companion Zenodo deposit
-(DOI to be added upon publication).
+The manuscript comparison starts from final cell-by-LR outputs produced by the
+ten evaluated methods. The shared SpaCCBench layer then applies identical D1-D4
+calculations to every method.
 
-## Four-dimensional evaluation framework
+- docs/method_runs.md records method versions and expected output files.
+- manuscript_scripts/run_benchmark.py evaluates harmonized outputs.
+- examples/README.md gives the expected directory layout.
+- docs/data_access.md maps scenarios to their public source datasets.
 
-| Dim | Metric | Question |
-|---|---|---|
-| D1 | n_hit / 25 | Does the method recover the top-25 candidate LR pairs with non-trivial per-cell scores? |
-| D2 | Pearson / Spearman / cosine / JS | Do per-cell scores agree with the expression-derived reference signal E? |
-| D3 | Moran's I, Geary's C | Are the scores spatially coherent (kNN-6 weight matrix)? |
-| D4 | mean AUC + permutation null | Do detected interactions track KEGG pathway activity of receptor-associated pathways? |
-
-A method is *globally strong* only if it performs consistently across all four
-dimensions. The geometric-mean composite
-
-```
-Composite_geo(m) = exp( (1/4) Σ_d log s_d(m) )
-```
-
-(where s_d are rank-normalised scores per metric) penalises uneven performance.
-
-## Standalone unified LR resource
-
-The merged ligand-receptor database is available independently of the
-evaluation pipeline:
-
-```python
-from spaccbench import load_lr_db
-
-mouse_db = load_lr_db("mouse")  # 8,234 pairs
-human_db = load_lr_db("human")  # 7,056 pairs
-print(mouse_db.head())
-```
-
-Columns: `ligand`, `receptor`, `n_sources`, `sources`. Sources are derived
-from the native resources of the 10 evaluated methods (see paper Methods §S1.3).
+Raw public spatial-transcriptomics data and large method output matrices are not
+duplicated in this Git repository.
 
 ## Citation
 
-```bibtex
+~~~bibtex
 @article{spaccbench2026,
-  title  = {SpaCCBench enables four-dimensional benchmarking of spatial cell-cell communication inference across diverse biological scenarios},
-  author = {Xie, Xiaolan and collaborators},
+  title  = {SpaCCBench: a scenario-aware four-dimensional benchmark for spatial cell-cell communication},
+  author = {Xu, Yiheng and Zhang, Zimu and Liu, Shuqi and Li, Xiao-Ming and Yu, Bin},
   year   = {2026},
-  note   = {Manuscript in preparation},
+  note   = {Submitted to BMC Bioinformatics}
 }
-```
+~~~
 
 ## Development
 
-```bash
+~~~bash
 git clone https://github.com/coffeei1i/spaccbench.git
 cd spaccbench
 pip install -e ".[dev]"
 pytest tests/
-```
+~~~
 
 ## License
 
-MIT. See [`LICENSE`](LICENSE).
+MIT. See LICENSE.

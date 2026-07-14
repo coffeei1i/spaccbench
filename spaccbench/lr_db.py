@@ -5,10 +5,9 @@ standalone community resource. See Methods §S1.3 of the SpaCCBench paper.
 """
 from __future__ import annotations
 
-from importlib.resources import as_file, files
-from pathlib import Path
-
 import pandas as pd
+
+from spaccbench.resources import resolve_data_file
 
 
 def load_lr_db(species: str) -> pd.DataFrame:
@@ -42,16 +41,10 @@ def load_lr_db(species: str) -> pd.DataFrame:
         )
 
     filename = f"unified_lr_db_{species_lower}.csv"
-    pkg_files = files("spaccbench") / "data"
-    resource = pkg_files / filename
     try:
-        with as_file(resource) as p:
-            path = Path(p)
-            if not path.is_file():
-                raise FileNotFoundError(path)
-            return pd.read_csv(path)
-    except (FileNotFoundError, ModuleNotFoundError) as e:
+        return pd.read_csv(resolve_data_file(filename))
+    except FileNotFoundError as e:
         raise FileNotFoundError(
             f"Unified LR database for {species!r} ({filename!r}) is not "
-            f"bundled. See README for data setup."
+            f"available. See README for data setup."
         ) from e

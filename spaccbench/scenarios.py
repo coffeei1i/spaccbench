@@ -9,17 +9,19 @@ dataset:
 - Pre-computed pathway activity matrix (cells × pathways)
 - Species ("mouse" or "human")
 
-Data files are shipped via ``importlib.resources`` from ``spaccbench/data/``.
+Small resources are packaged; prepared scenarios may be supplied through
+SPACCBENCH_DATA_DIR.
 """
 from __future__ import annotations
 
 from dataclasses import dataclass
-from importlib.resources import as_file, files
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 import pandas as pd
+
+from spaccbench.resources import resolve_data_file
 
 
 SCENARIO_REGISTRY: dict[str, dict[str, Any]] = {
@@ -81,18 +83,14 @@ class Scenario:
 # ----- Data resolution --------------------------------------------------------
 
 def _resource_path(filename: str) -> Path:
-    """Resolve a packaged data file. Raises FileNotFoundError if missing."""
-    pkg_files = files("spaccbench") / "data"
-    resource = pkg_files / filename
+    """Resolve a prepared scenario file from external or packaged data."""
     try:
-        with as_file(resource) as p:
-            if not p.is_file():
-                raise FileNotFoundError(p)
-            return Path(p)
-    except (FileNotFoundError, ModuleNotFoundError) as e:
+        return resolve_data_file(filename)
+    except FileNotFoundError as e:
         raise FileNotFoundError(
-            f"Scenario data file {filename!r} is not bundled with this "
-            f"installation. See README for data setup."
+            f"Prepare scenario data file {filename!r} with "
+            f"python tools/build_scenario.py or place the prepared file "
+            f"under SPACCBENCH_DATA_DIR."
         ) from e
 
 
@@ -131,7 +129,7 @@ def load_scenario(name: str) -> Scenario:
     KeyError
         If ``name`` is not in the registry.
     FileNotFoundError
-        If the bundled data files are missing.
+        If one or more required prepared data files are missing.
     """
     if name not in SCENARIO_REGISTRY:
         raise KeyError(

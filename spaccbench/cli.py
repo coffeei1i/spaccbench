@@ -133,14 +133,20 @@ def cmd_evaluate(args: argparse.Namespace) -> int:
 
 def cmd_list_methods(args: argparse.Namespace) -> int:
     from spaccbench import list_methods
+
     rows = list_methods()
-    width = max(len(r["name"]) for r in rows)
-    for r in rows:
-        marker = "✓" if r["status"] == "bundled" else "·"
-        print(f"  {marker}  {r['name']:<{width}}  ({r['status']})")
-    print(f"\n{sum(1 for r in rows if r['status'] == 'bundled')} bundled, "
-          f"{sum(1 for r in rows if r['status'] == 'stub')} stub. "
-          f"See docs/extending.md to add your own.")
+    width = max(len(row["name"]) for row in rows)
+    for row in rows:
+        print(f"  -  {row['name']:<{width}}  ({row['status']})")
+
+    counts = {
+        status: sum(row["status"] == status for row in rows)
+        for status in {row["status"] for row in rows}
+    }
+    summary = ", ".join(
+        f"{count} {status}" for status, count in sorted(counts.items())
+    )
+    print(f"\n{summary}. See docs/extending.md to add your own method.")
     return 0
 
 

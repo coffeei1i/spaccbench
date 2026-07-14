@@ -27,3 +27,9 @@ env/
 # Local data scratch (real data is shipped via package_data)
 data_raw/
 scratch/
+spaccbench/data/*.h5ad
+spaccbench/data/*.parquet
+examples/method_outputs/
+manuscript_outputs/
+*.aux
+*.log

@@ -5,12 +5,16 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "spaccbench"
 version = "0.1.0"
-description = "Four-dimensional benchmark for spatial cell-cell communication inference"
+description = "Scenario-aware four-dimensional benchmark for spatial cell-cell communication"
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "MIT" }
 authors = [
-    { name = "Xiaolan Xie" },
+    { name = "Yiheng Xu" },
+    { name = "Zimu Zhang" },
+    { name = "Shuqi Liu" },
+    { name = "Xiao-Ming Li", email = "lixm@zju.edu.cn" },
+    { name = "Bin Yu", email = "yubin007@zju.edu.cn" },
 ]
 keywords = [
     "spatial-transcriptomics",

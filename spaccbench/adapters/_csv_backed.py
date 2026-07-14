@@ -1,18 +1,18 @@
-"""Shared implementation for adapters that read a pre-computed CSV/parquet."""
+"""Shared implementation for adapters that read prepared CSV/parquet scores."""
 from __future__ import annotations
 
-from importlib.resources import as_file, files
 from pathlib import Path
 
 import pandas as pd
 
 from spaccbench.adapters.base import BaseAdapter
+from spaccbench.resources import resolve_data_file
 
 
 class CsvBackedAdapter(BaseAdapter):
-    """Adapter that loads scores from a packaged CSV/parquet file.
+    """Adapter that loads prepared CSV/parquet scores.
 
-    The bundled file path follows the convention:
+    The default score path follows the convention:
         ``spaccbench/data/{method_name_lower}_{scenario}_scores.{csv|parquet}``
 
     Override the class attributes ``name`` and ``file_template`` in subclasses.
@@ -25,32 +25,18 @@ class CsvBackedAdapter(BaseAdapter):
         filename = self.file_template.format(
             name_lower=self.name.lower(), scenario=scenario
         )
-        pkg_files = files("spaccbench") / "data"
-        resource = pkg_files / filename
-
-        try:
-            with as_file(resource) as p:
-                path = Path(p)
-                if not path.is_file():
-                    raise FileNotFoundError(path)
-                return self._read(path)
-        except (FileNotFoundError, ModuleNotFoundError):
-            # Fall back to a co-bundled csv with the same stem, in case the
-            # build pipeline emitted csv instead of parquet.
-            alt = filename.rsplit(".", 1)[0] + ".csv"
-            alt_resource = pkg_files / alt
+        candidates = [filename, filename.rsplit(".", 1)[0] + ".csv"]
+        for candidate in candidates:
             try:
-                with as_file(alt_resource) as p:
-                    path = Path(p)
-                    if path.is_file():
-                        return self._read(path)
-            except (FileNotFoundError, ModuleNotFoundError):
-                pass
-            raise FileNotFoundError(
-                f"{self.name} scores file {filename!r} (or .csv fallback) is "
-                f"not bundled. Run `python tools/build_adapter_scores.py "
-                f"--method {self.name} --scenario {scenario}` to generate it."
-            )
+                return self._read(resolve_data_file(candidate))
+            except FileNotFoundError:
+                continue
+
+        raise FileNotFoundError(
+            f"Prepare {self.name} scores as {filename!r} or CSV with "
+            f"python tools/build_adapter_scores.py --method {self.name} "
+            f"--scenario {scenario}."
+        )
 
     @staticmethod
     def _read(path: Path) -> pd.DataFrame:
@@ -58,6 +44,5 @@ class CsvBackedAdapter(BaseAdapter):
             df = pd.read_parquet(path)
         else:
             df = pd.read_csv(path, index_col=0)
-        # Normalise column names to lowercase ligand-receptor.
         df.columns = [str(c).strip().lower().replace("_", "-") for c in df.columns]
         return df

@@ -1,18 +1,36 @@
 cff-version: 1.2.0
-message: "If you use SpaCCBench, please cite the following paper."
-title: "SpaCCBench enables four-dimensional benchmarking of spatial cell-cell communication inference across diverse biological scenarios"
+message: "If you use SpaCCBench, please cite the associated manuscript."
+title: "SpaCCBench: a scenario-aware four-dimensional benchmark for spatial cell-cell communication"
 authors:
-  - family-names: Xie
-    given-names: Xiaolan
+  - family-names: Xu
+    given-names: Yiheng
+  - family-names: Zhang
+    given-names: Zimu
+  - family-names: Liu
+    given-names: Shuqi
+  - family-names: Li
+    given-names: Xiao-Ming
+    email: lixm@zju.edu.cn
+  - family-names: Yu
+    given-names: Bin
+    email: yubin007@zju.edu.cn
 version: 0.1.0
-date-released: 2026-05-20
+date-released: 2026-07-15
 license: MIT
 repository-code: "https://github.com/coffeei1i/spaccbench"
 preferred-citation:
   type: article
-  title: "SpaCCBench enables four-dimensional benchmarking of spatial cell-cell communication inference across diverse biological scenarios"
+  title: "SpaCCBench: a scenario-aware four-dimensional benchmark for spatial cell-cell communication"
   authors:
-    - family-names: Xie
-      given-names: Xiaolan
+    - family-names: Xu
+      given-names: Yiheng
+    - family-names: Zhang
+      given-names: Zimu
+    - family-names: Liu
+      given-names: Shuqi
+    - family-names: Li
+      given-names: Xiao-Ming
+    - family-names: Yu
+      given-names: Bin
   year: 2026
-  notes: "Manuscript in preparation."
+  notes: "Submitted to BMC Bioinformatics."

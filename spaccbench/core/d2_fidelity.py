@@ -55,8 +55,10 @@ def _pair_metrics(m: np.ndarray, r: np.ndarray) -> dict:
         pearson = float("nan")
         spearman = float("nan")
     else:
-        pearson = float(pearsonr(m, r).statistic)
-        spearman = float(spearmanr(m, r).statistic)
+        pearson_value, _ = pearsonr(m, r)
+        spearman_value, _ = spearmanr(m, r)
+        pearson = float(pearson_value)
+        spearman = float(spearman_value)
     return {
         "pearson": pearson,
         "spearman": spearman,
