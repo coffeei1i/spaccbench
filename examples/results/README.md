@@ -1,0 +1,25 @@
+# THA and CTX result examples
+
+These compact tables are the method-level results used to assemble the THA and
+CTX benchmark atlas in Figure 2 of the manuscript. Each table contains all ten
+methods evaluated in the adult neural tissue scenario.
+
+| File | Dataset | Contents |
+|---|---|---|
+| `THA_method_scores.csv` | Mouse hypothalamus MERFISH | D1-D4 raw metrics, within-scenario rank scores, and geometric composite |
+| `CTX_method_scores.csv` | Mouse cortex MERFISH | D1-D4 raw metrics, within-scenario rank scores, and geometric composite |
+
+Column meanings:
+
+- `display`: method name.
+- `d1` to `d4` and `d1_raw` to `d4_raw`: the same exported raw benchmark metrics.
+- `d1_raw`: candidate-pair recovery rate.
+- `d2_raw`: mean Pearson expression-fidelity score.
+- `d3_raw`: mean Moran's I spatial-coherence score.
+- `d4_raw`: mean receptor-pathway AUC.
+- `d1_rank_score` to `d4_rank_score`: within-scenario rank-normalized scores.
+- `composite_geo`: geometric mean of the four rank scores.
+
+The full per-cell ligand-receptor matrices are intentionally not duplicated in
+Git because they are large method outputs. The compact files here are sufficient
+to inspect, plot, and compare the reported method-level THA/CTX results.

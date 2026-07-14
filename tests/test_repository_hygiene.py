@@ -1,7 +1,6 @@
 """Repository-level checks for public paths and documentation."""
 from pathlib import Path
 
-
 FORBIDDEN = (
     "/data3/",
     "Z:/",

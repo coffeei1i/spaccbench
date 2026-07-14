@@ -21,12 +21,12 @@ from spaccbench.adapters import (
     list_methods,
 )
 from spaccbench.core import (
+    composite_geo,
+    composite_table,
     d1_detection,
     d2_fidelity,
     d3_spatial,
     d4_pathway,
-    composite_geo,
-    composite_table,
     rank_score,
 )
 from spaccbench.evaluate import compose_cohort, evaluate

@@ -21,7 +21,6 @@ if __package__ is None or __package__ == "":
 
 from spaccbench import BaseAdapter, compose_cohort, evaluate  # noqa: E402
 
-
 SCENARIO_SAMPLE = {
     "tha": "THA",
     "ctx": "CTX",

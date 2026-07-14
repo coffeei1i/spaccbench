@@ -10,7 +10,7 @@ The kNN weight matrix uses k=6 neighbours, excluding self.
 """
 from __future__ import annotations
 
-from typing import Iterable, Tuple
+from collections.abc import Iterable
 
 import numpy as np
 import pandas as pd

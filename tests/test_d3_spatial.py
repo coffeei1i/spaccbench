@@ -15,8 +15,8 @@ def test_morans_i_high_for_smooth_gradient():
     W = build_knn_weights(coords, k=6)
     # Smooth horizontal gradient: each cell value = x coord.
     x = coords[:, 0].astype(float)
-    I = morans_i(x, W)
-    assert I > 0.9  # very high autocorrelation
+    moran_value = morans_i(x, W)
+    assert moran_value > 0.9  # very high autocorrelation
 
 
 def test_morans_i_near_zero_for_random():
@@ -24,8 +24,8 @@ def test_morans_i_near_zero_for_random():
     coords = rng.uniform(0, 100, size=(500, 2))
     W = build_knn_weights(coords, k=6)
     x = rng.normal(size=500)
-    I = morans_i(x, W)
-    assert abs(I) < 0.15
+    moran_value = morans_i(x, W)
+    assert abs(moran_value) < 0.15
 
 
 def test_gearys_c_low_for_smooth():

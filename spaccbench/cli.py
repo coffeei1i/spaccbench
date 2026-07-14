@@ -167,7 +167,7 @@ def cmd_info(args: argparse.Namespace) -> int:
     meta = SCENARIO_REGISTRY[args.scenario]
     for k, v in meta.items():
         if k == "files":
-            print(f"  files:")
+            print("  files:")
             for fk, fv in v.items():
                 print(f"    {fk:<10} {fv}")
         else:

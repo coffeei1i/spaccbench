@@ -2,8 +2,6 @@
 import subprocess
 import sys
 
-import pytest
-
 
 def _run_cli(*args, expect_zero=True):
     """Invoke the CLI via the module so it works without pip-install in tests."""

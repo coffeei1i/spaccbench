@@ -23,7 +23,6 @@ import pandas as pd
 
 from spaccbench.resources import resolve_data_file
 
-
 SCENARIO_REGISTRY: dict[str, dict[str, Any]] = {
     "tha": {
         "name": "tha",
@@ -153,8 +152,10 @@ def load_scenario(name: str) -> Scenario:
         top25_lr = [str(x).lower().strip() for x in top25_table["lr"].tolist()]
     elif {"ligand", "receptor"}.issubset(top25_table.columns):
         top25_lr = [
-            f"{str(l).lower().strip()}-{str(r).lower().strip()}"
-            for l, r in zip(top25_table["ligand"], top25_table["receptor"])
+            f"{str(ligand).lower().strip()}-{str(receptor).lower().strip()}"
+            for ligand, receptor in zip(
+                top25_table["ligand"], top25_table["receptor"]
+            )
         ]
     else:
         raise ValueError(

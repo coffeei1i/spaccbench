@@ -1,7 +1,6 @@
 """Regression tests for public manuscript metadata."""
 from pathlib import Path
 
-
 TITLE = (
     "SpaCCBench: a scenario-aware four-dimensional benchmark for "
     "spatial cell-cell communication"

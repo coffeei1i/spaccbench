@@ -5,9 +5,8 @@ returns a nested result dict including the geometric-mean composite.
 """
 from __future__ import annotations
 
-from typing import Iterable
+from collections.abc import Iterable
 
-import numpy as np
 import pandas as pd
 
 from spaccbench.adapters import BaseAdapter, get_adapter

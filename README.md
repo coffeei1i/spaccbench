@@ -10,6 +10,12 @@ It provides a common adapter interface, species-stratified ligand-receptor
 resources, and a reproducible workflow for harmonized cell-by-LR score
 matrices.
 
+## Benchmark overview
+
+![Overview of the SpaCCBench four-dimensional evaluation framework](docs/figures/figure1.png)
+
+*Figure 1. Overview of the SpaCCBench four-dimensional evaluation framework.*
+
 ## Installation
 
 ~~~bash
@@ -17,50 +23,6 @@ pip install git+https://github.com/coffeei1i/spaccbench.git
 ~~~
 
 SpaCCBench requires Python 3.9 or newer.
-
-## Quickstart
-
-The unified ligand-receptor resources are packaged with the repository and work
-without downloading a spatial dataset:
-
-~~~python
-from spaccbench import load_lr_db
-
-mouse_lr = load_lr_db("mouse")
-human_lr = load_lr_db("human")
-
-print(mouse_lr.shape)  # (8234, 4)
-print(human_lr.shape)  # (7056, 4)
-print(mouse_lr.head())
-~~~
-
-Each table contains ligand, receptor, n_sources, and sources. The mouse resource
-contains 8,234 pairs and is the resource used by the manuscript benchmark.
-
-## Running a benchmark
-
-Large prepared scenario files are intentionally kept outside Git. Put the
-scenario files in one directory and set SPACCBENCH_DATA_DIR before evaluation:
-
-~~~bash
-export SPACCBENCH_DATA_DIR=/path/to/prepared_scenarios
-spaccbench list-methods
-spaccbench list-scenarios
-spaccbench evaluate --method LIANA --scenario tha
-~~~
-
-On Windows PowerShell:
-
-~~~powershell
-$env:SPACCBENCH_DATA_DIR = "D:\path\to\prepared_scenarios"
-spaccbench list-scenarios
-~~~
-
-The THA and CTX scenario definitions expect an AnnData file, an
-expression-informed LR candidate table, an expression-derived reference
-matrix, and a pathway-activity matrix. The benchmark uses 25 candidates per
-sample as a fixed algorithmic setting. See docs/data_access.md for source
-datasets and tools/build_scenario.py for preparation.
 
 ## Four-dimensional framework
 
@@ -73,6 +35,18 @@ datasets and tools/build_scenario.py for preparation.
 
 A cohort-level geometric composite summarizes rank-normalized D1-D4 scores
 while penalizing uneven performance across dimensions.
+
+## Example manuscript results
+
+![Four-dimensional evaluation of ten spatial CCC methods on THA and CTX MERFISH](docs/figures/figure2.png)
+
+*Figure 2. Four-dimensional evaluation of ten spatial CCC methods on THA and CTX MERFISH.*
+
+Compact method-level results underlying the THA and CTX benchmark atlas are
+provided as [`THA_method_scores.csv`](examples/results/THA_method_scores.csv)
+and [`CTX_method_scores.csv`](examples/results/CTX_method_scores.csv). See the
+[results column guide](examples/results/README.md) for metric definitions. Large
+per-cell ligand-receptor score matrices remain outside Git.
 
 ## Evaluating another method
 
@@ -135,6 +109,8 @@ cd spaccbench
 pip install -e ".[dev]"
 pytest tests/
 ~~~
+
+See [tests/README.md](tests/README.md) for the scope of each test module.
 
 ## License
 
