@@ -21,7 +21,9 @@ functions are used for every method.
 
 ## Normalization rules used in the manuscript scripts
 
-The public manuscript entry point implements harmonization in manuscript_scripts/run_benchmark.py. The key rules are:
+The shared implementation is `spaccbench.harmonization.harmonize_score_matrix`.
+Both the package adapters and `manuscript_scripts/run_benchmark.py` call this
+function. The key rules are:
 
 1. **Cell alignment.** Each raw matrix is reindexed to `adata.obs_names`.
    Rows are aligned to the benchmark cell index with `0.0` used for cells without an emitted score.
@@ -34,7 +36,8 @@ The public manuscript entry point implements harmonization in manuscript_scripts
    variants where needed.
 5. **Duplicate columns.** If LR names become duplicated after normalization,
    columns are summed.
-6. **LR-pair coverage.** Evaluated LR pairs are represented consistently across methods; pairs without an emitted method score contribute a zero-filled score column in the manuscript scoring scripts.
+6. **LR-pair coverage.** Pairs absent from a method output remain absent; each
+   downstream metric records or skips them according to its documented rule.
 
 These choices make all downstream metrics operate on the same matrix shape and keep comparisons focused on method signal rather than file-format differences.
 

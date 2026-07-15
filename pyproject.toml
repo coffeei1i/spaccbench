@@ -49,11 +49,19 @@ dev = [
     "pytest-cov>=4.0",
     "ruff>=0.1",
 ]
+data = [
+    "pyarrow>=10",
+]
 pathway = [
-    "decoupler>=1.5",
+    "decoupler>=1.9,<2",
+    "pyarrow>=10",
 ]
 all = [
-    "spaccbench[dev,pathway]",
+    "decoupler>=1.9,<2",
+    "pyarrow>=10",
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "ruff>=0.1",
 ]
 
 [project.urls]

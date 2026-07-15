@@ -3,6 +3,7 @@
 Orchestrates D1-D4 evaluation for a single (method, scenario) pair and
 returns a nested result dict including the geometric-mean composite.
 """
+
 from __future__ import annotations
 
 from collections.abc import Iterable
@@ -19,6 +20,7 @@ from spaccbench.core import (
     d4_pathway,
     rank_score,
 )
+from spaccbench.harmonization import harmonize_score_matrix
 from spaccbench.scenarios import Scenario, load_scenario
 
 DEFAULT_DIMS = ("d1", "d2", "d3", "d4")
@@ -71,9 +73,7 @@ def evaluate(
 
     dims = {d.lower() for d in dimensions}
     if not dims.issubset({"d1", "d2", "d3", "d4"}):
-        raise ValueError(
-            f"dimensions must be subset of {{d1, d2, d3, d4}}, got {dimensions}"
-        )
+        raise ValueError(f"dimensions must be subset of {{d1, d2, d3, d4}}, got {dimensions}")
 
     # Adapter -> per-cell LR matrix
     raw_scores = adapter.load_scores(scn.name)
@@ -99,7 +99,10 @@ def evaluate(
     # D3
     if "d3" in dims:
         result["d3"] = d3_spatial(
-            scores, scn.coords, scn.top25_lr, k=6,
+            scores,
+            scn.coords,
+            scn.top25_lr,
+            k=6,
         )
         if not return_per_lr:
             result["d3"].pop("per_lr", None)
@@ -129,18 +132,14 @@ def evaluate(
 def _align_scores_to_adata(scores: pd.DataFrame, scn: Scenario) -> pd.DataFrame:
     """Reindex score rows to match ``scn.adata.obs_names``.
 
-    Cells present in adata but missing from scores get all-NaN rows.
+    Cells present in adata but missing from scores get zero-filled rows.
     Cells in scores not in adata are dropped.
     """
-    obs_names = scn.adata.obs_names.astype(str)
-    score_index = scores.index.astype(str)
-    scores = scores.copy()
-    scores.index = score_index
-    aligned = scores.reindex(obs_names)
-    return aligned
+    return harmonize_score_matrix(scores, cell_index=scn.adata.obs_names)
 
 
 # ----- Cohort-level composite -------------------------------------------------
+
 
 def compose_cohort(results: list[dict]) -> pd.DataFrame:
     """Combine per-method ``evaluate()`` results into a cohort table with
@@ -187,11 +186,11 @@ def compose_cohort(results: list[dict]) -> pd.DataFrame:
         df[s_col] = rank_score(df[col], direction=direction)
         rank_cols.append(s_col)
 
-    main = [c for c in ["s_d1_fraction", "s_d2_pearson_r",
-                         "s_d3_morans_i", "s_d4_mean_auc"]
-            if c in rank_cols]
+    main = [
+        c
+        for c in ["s_d1_fraction", "s_d2_pearson_r", "s_d3_morans_i", "s_d4_mean_auc"]
+        if c in rank_cols
+    ]
     if main:
-        df["composite_geo"] = df[main].apply(
-            lambda row: composite_geo(row), axis=1
-        )
+        df["composite_geo"] = df[main].apply(lambda row: composite_geo(row), axis=1)
     return df

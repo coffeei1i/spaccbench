@@ -8,44 +8,68 @@ Produces (in ``--output-dir``):
   <scenario>_gt_signal.parquet    — cells × 25 expression-derived reference E.
   <scenario>_pw_act.parquet       — cells × pathways GSVA activity.
 
-The top-25 selection logic mirrors scripts/prepare_interactions.py:
+The expression-informed candidate ranking uses:
 
   E_i(L, R) = R_norm_i * smooth(L_norm, KNN5)_i
   score(L, R) = n_sources(L, R) * mean_{top 10% i} E_i(L, R)
 
-This script intentionally has no dependency on scripts/io_methods.py so that
-the package is self-contained.
+The implementation is self-contained and uses only public package resources
+plus the paths supplied on the command line.
 """
+
 from __future__ import annotations
 
 import argparse
-from pathlib import Path
 import sys
 import warnings
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
 
 def parse_args():
-    p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    p = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     p.add_argument("--scenario", required=True, help="Scenario name (e.g. tha)")
     p.add_argument("--adata", required=True, type=Path, help="Path to raw .h5ad")
-    p.add_argument("--lr-db", required=True, type=Path,
-                   help="Unified LR DB CSV (cols: ligand, receptor, n_sources, sources)")
-    p.add_argument("--kegg", required=True, type=Path,
-                   help="KEGG GMT file (e.g. kegg_mouse.gmt)")
-    p.add_argument("--cell-type-col", default="cell_type",
-                   help="adata.obs column containing cell type labels (default: cell_type)")
-    p.add_argument("--output-dir", required=True, type=Path,
-                   help="Where to write the bundled files (typically spaccbench/data/)")
+    p.add_argument(
+        "--lr-db",
+        required=True,
+        type=Path,
+        help="Unified LR DB CSV (cols: ligand, receptor, n_sources, sources)",
+    )
+    p.add_argument("--kegg", required=True, type=Path, help="KEGG GMT file (e.g. kegg_mouse.gmt)")
+    p.add_argument(
+        "--cell-type-col",
+        default="cell_type",
+        help="adata.obs column containing cell type labels (default: cell_type)",
+    )
+    p.add_argument(
+        "--output-dir",
+        required=True,
+        type=Path,
+        help="Where to write the bundled files (typically spaccbench/data/)",
+    )
     p.add_argument("--top-n", type=int, default=25, help="Top N LR pairs (default 25)")
-    p.add_argument("--k-neighbours", type=int, default=5,
-                   help="KNN neighbours for ligand smoothing (default 5)")
-    p.add_argument("--top-pct-mean", type=float, default=0.10,
-                   help="Use top this fraction of E values per LR for the ranking mean (default 0.10)")
-    p.add_argument("--skip-pw-act", action="store_true",
-                   help="Skip GSVA pathway activity computation (D4 will be unusable).")
+    p.add_argument(
+        "--k-neighbours",
+        type=int,
+        default=5,
+        help="KNN neighbours for ligand smoothing (default 5)",
+    )
+    p.add_argument(
+        "--top-pct-mean",
+        type=float,
+        default=0.10,
+        help="Use top this fraction of E values per LR for the ranking mean (default 0.10)",
+    )
+    p.add_argument(
+        "--skip-pw-act",
+        action="store_true",
+        help="Skip GSVA pathway activity computation (D4 will be unusable).",
+    )
     return p.parse_args()
 
 
@@ -58,6 +82,7 @@ def _minmax(x: np.ndarray) -> np.ndarray:
 
 def _knn_smooth(L: np.ndarray, coords: np.ndarray, k: int) -> np.ndarray:
     from scipy.spatial import cKDTree
+
     tree = cKDTree(coords)
     _, idx = tree.query(coords, k=k + 1)  # includes self
     return L[idx].mean(axis=1)
@@ -119,13 +144,15 @@ def select_top25(
 
         lr_key = f"{lig_key}-{rec_key}"
         e_columns[lr_key] = E
-        rows.append({
-            "ligand": lig,
-            "receptor": rec,
-            "lr": lr_key,
-            "n_sources": n_sources,
-            "score": score,
-        })
+        rows.append(
+            {
+                "ligand": lig,
+                "receptor": rec,
+                "lr": lr_key,
+                "n_sources": n_sources,
+                "score": score,
+            }
+        )
 
     if not rows:
         raise RuntimeError("No LR pair scored. Check gene overlap between adata and LR DB.")
@@ -136,7 +163,6 @@ def select_top25(
     # Add sender/receiver cell type by argmax of mean L_norm / R_norm per cell type.
     if cell_type_col in adata.obs:
         ct = adata.obs[cell_type_col].astype(str).to_numpy()
-        ct_levels = pd.Series(ct).unique().tolist()
         ct_mat = pd.DataFrame({"ct": ct})
 
         senders = []
@@ -166,7 +192,8 @@ def select_top25(
         top25["receiver_celltype"] = receivers
     else:
         warnings.warn(
-            f"adata.obs has no column {cell_type_col!r}; skipping sender/receiver assignment."
+            f"adata.obs has no column {cell_type_col!r}; skipping sender/receiver assignment.",
+            stacklevel=2,
         )
 
     # Build GT matrix (cells × top_n).
@@ -182,10 +209,13 @@ def compute_pathway_activity(adata, kegg_path: Path) -> pd.DataFrame:
     try:
         import decoupler as dc
         import scanpy as sc
-    except ImportError:
-        raise ImportError("Install decoupler + scanpy for D4: `pip install decoupler scanpy`")
+    except ImportError as exc:
+        raise ImportError(
+            "Install the pathway extra for D4: `pip install 'spaccbench[pathway]'`"
+        ) from exc
 
     from spaccbench.core.d4_pathway import load_gmt
+
     kegg = load_gmt(kegg_path)
 
     if adata.X.max() > 50:
@@ -194,13 +224,19 @@ def compute_pathway_activity(adata, kegg_path: Path) -> pd.DataFrame:
         sc.pp.log1p(adata)
 
     dc.run_gsva(
-        mat=adata, net=kegg, source="source", target="target",
-        use_raw=False, verbose=True,
+        mat=adata,
+        net=kegg,
+        source="source",
+        target="target",
+        use_raw=False,
+        verbose=True,
     )
     pw_act = adata.obsm["gsva_estimate"]
     if hasattr(pw_act, "values"):
         return pd.DataFrame(pw_act.values, index=adata.obs_names, columns=pw_act.columns)
-    pathway_names = adata.uns.get("gsva_estimate_columns", [f"pw{i}" for i in range(pw_act.shape[1])])
+    pathway_names = adata.uns.get(
+        "gsva_estimate_columns", [f"pw{i}" for i in range(pw_act.shape[1])]
+    )
     return pd.DataFrame(pw_act, index=adata.obs_names, columns=pathway_names)
 
 
@@ -210,12 +246,14 @@ def main():
 
     print(f"[0/3] Loading adata: {args.adata}", flush=True)
     import anndata as ad
+
     adata = ad.read_h5ad(args.adata)
     lr_db = pd.read_csv(args.lr_db)
     print(f"      cells={adata.n_obs}  genes={adata.n_vars}  LR pool={len(lr_db)}")
 
     top25, gt = select_top25(
-        adata, lr_db,
+        adata,
+        lr_db,
         top_n=args.top_n,
         k=args.k_neighbours,
         top_pct_mean=args.top_pct_mean,
@@ -234,7 +272,7 @@ def main():
     gt.to_parquet(gt_path)
 
     if not args.skip_pw_act:
-        print(f"[3/3] Running GSVA pathway activity (may take 5-10 min)...")
+        print("[3/3] Running GSVA pathway activity (may take 5-10 min)...")
         pw_act = compute_pathway_activity(adata, args.kegg)
         pw_path = args.output_dir / f"{scn}_pw_act.parquet"
         pw_act.to_parquet(pw_path)

@@ -6,6 +6,7 @@ Put method outputs under examples/method_outputs or pass --outputs, then run:
 
 The script passes each final cell-by-LR score matrix to spaccbench.evaluate.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -20,6 +21,7 @@ if __package__ is None or __package__ == "":
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from spaccbench import BaseAdapter, compose_cohort, evaluate  # noqa: E402
+from spaccbench.harmonization import harmonize_score_matrix  # noqa: E402
 
 SCENARIO_SAMPLE = {
     "tha": "THA",
@@ -41,12 +43,7 @@ METHODS = [
 
 
 def _normalise_lr_columns(df: pd.DataFrame) -> pd.DataFrame:
-    out = df.copy()
-    out.columns = [
-        str(column).strip().lower().replace("_", "-").replace("|", "-")
-        for column in out.columns
-    ]
-    return out
+    return harmonize_score_matrix(df)
 
 
 def _read_indexed_csv(path: Path) -> pd.DataFrame:
@@ -80,6 +77,34 @@ def _first_existing(candidates: list[Path]) -> Path:
     return candidates[0]
 
 
+def _spider_path(root: Path, sample: str) -> Path:
+    """Resolve the exact or suffix-matched SPIDER sample directory."""
+    exact = root / "spider" / sample / f"{sample}.csv"
+    if exact.exists():
+        return exact
+
+    spider_root = root / "spider"
+    if spider_root.exists():
+        sample_key = sample.lower()
+        directories = sorted(
+            (
+                path
+                for path in spider_root.iterdir()
+                if path.is_dir()
+                and (path.name.lower() == sample_key or path.name.lower().endswith(sample_key))
+            ),
+            key=lambda path: path.name.lower(),
+        )
+        for directory in directories:
+            named = directory / f"{sample}.csv"
+            if named.exists():
+                return named
+            csv_files = sorted(directory.rglob("*.csv"))
+            if csv_files:
+                return csv_files[0]
+    return exact
+
+
 @dataclass(frozen=True)
 class MethodSpec:
     method: str
@@ -98,45 +123,30 @@ SPECS = {
     ),
     "stLearn": MethodSpec(
         "stLearn",
-        lambda root, sample: (
-            root / "stlearn" / sample / f"{sample}_SPOTxLR_lr_scores.csv"
-        ),
+        lambda root, sample: root / "stlearn" / sample / f"{sample}_SPOTxLR_lr_scores.csv",
         _read_stlearn,
     ),
     "SPIDER": MethodSpec(
         "SPIDER",
-        lambda root, sample: root / "spider" / sample / f"{sample}.csv",
+        _spider_path,
     ),
     "Spacia": MethodSpec(
         "Spacia",
-        lambda root, sample: (
-            root / "spacia" / sample / f"{sample}_cellxLR_spacia.csv"
-        ),
+        lambda root, sample: root / "spacia" / sample / f"{sample}_cellxLR_spacia.csv",
     ),
     "StereoSiTE": MethodSpec(
         "StereoSiTE",
         lambda root, sample: _first_existing(
             [
-                root
-                / "stereosite"
-                / sample
-                / sample
-                / f"{sample}_LR_intensity_matrix.csv",
-                root
-                / "stereosite"
-                / sample
-                / f"{sample}_LR_intensity_matrix.csv",
+                root / "stereosite" / sample / sample / f"{sample}_LR_intensity_matrix.csv",
+                root / "stereosite" / sample / f"{sample}_LR_intensity_matrix.csv",
             ]
         ),
     ),
     "CellAgentChat": MethodSpec(
         "CellAgentChat",
         lambda root, sample: (
-            root
-            / "cellagentchat"
-            / sample
-            / "out"
-            / "cell_receiving_scores_FINAL.csv"
+            root / "cellagentchat" / sample / "out" / "cell_receiving_scores_FINAL.csv"
         ),
         _read_cellagentchat,
     ),
@@ -146,18 +156,13 @@ SPECS = {
     ),
     "LARIS": MethodSpec(
         "LARIS",
-        lambda root, sample: (
-            root / "laris" / sample / f"{sample}_prepare_CellByLR.csv"
-        ),
+        lambda root, sample: root / "laris" / sample / f"{sample}_prepare_CellByLR.csv",
     ),
     "SpaCcLink": MethodSpec(
         "SpaCcLink",
         lambda root, sample: _first_existing(
             [
-                root
-                / "spacclink"
-                / sample
-                / f"{sample}_ALL_LR_cellxLR.csv",
+                root / "spacclink" / sample / f"{sample}_ALL_LR_cellxLR.csv",
                 root / "spacclink" / sample / f"{sample}_LR_scores.csv",
             ]
         ),

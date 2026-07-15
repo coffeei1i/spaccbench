@@ -31,7 +31,7 @@ jobs:
 
       - name: Run linter
         run: |
-          ruff check spaccbench/ tests/
+          ruff check spaccbench/ tests/ tools/ manuscript_scripts/
 
       - name: Run tests
         run: |
@@ -49,3 +49,6 @@ jobs:
       - run: spaccbench version
       - run: spaccbench list-methods
       - run: spaccbench list-scenarios
+      - run: python tools/build_scenario.py --help
+      - run: python tools/build_adapter_scores.py --help
+      - run: python manuscript_scripts/run_benchmark.py --help

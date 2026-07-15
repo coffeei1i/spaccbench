@@ -8,6 +8,7 @@ Public API:
 
 See https://github.com/coffeei1i/spaccbench for documentation.
 """
+
 from __future__ import annotations
 
 from spaccbench._version import __version__
@@ -30,6 +31,7 @@ from spaccbench.core import (
     rank_score,
 )
 from spaccbench.evaluate import compose_cohort, evaluate
+from spaccbench.harmonization import harmonize_score_matrix, normalise_lr_name
 from spaccbench.lr_db import load_lr_db
 from spaccbench.scenarios import Scenario, list_scenarios, load_scenario
 
@@ -41,6 +43,8 @@ __all__ = [
     "load_scenario",
     "list_scenarios",
     "load_lr_db",
+    "harmonize_score_matrix",
+    "normalise_lr_name",
     # Dimension functions
     "d1_detection",
     "d2_fidelity",

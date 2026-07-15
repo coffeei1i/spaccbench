@@ -1,4 +1,5 @@
 """Shared implementation for adapters that read prepared CSV/parquet scores."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -6,6 +7,7 @@ from pathlib import Path
 import pandas as pd
 
 from spaccbench.adapters.base import BaseAdapter
+from spaccbench.harmonization import harmonize_score_matrix
 from spaccbench.resources import resolve_data_file
 
 
@@ -22,9 +24,7 @@ class CsvBackedAdapter(BaseAdapter):
     file_template: str = "{name_lower}_{scenario}_scores.parquet"
 
     def load_scores(self, scenario: str) -> pd.DataFrame:
-        filename = self.file_template.format(
-            name_lower=self.name.lower(), scenario=scenario
-        )
+        filename = self.file_template.format(name_lower=self.name.lower(), scenario=scenario)
         candidates = [filename, filename.rsplit(".", 1)[0] + ".csv"]
         for candidate in candidates:
             try:
@@ -44,5 +44,4 @@ class CsvBackedAdapter(BaseAdapter):
             df = pd.read_parquet(path)
         else:
             df = pd.read_csv(path, index_col=0)
-        df.columns = [str(c).strip().lower().replace("_", "-") for c in df.columns]
-        return df
+        return harmonize_score_matrix(df)

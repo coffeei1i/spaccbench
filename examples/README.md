@@ -4,6 +4,10 @@ This directory contains notebooks and the expected layout for harmonized method
 outputs. Prepared scenario files must be available through
 SPACCBENCH_DATA_DIR.
 
+The single end-to-end notebook,
+`evaluate_all_methods_CTX_THA.ipynb`, is the canonical workflow for all
+available manuscript method outputs on THA and CTX.
+
 ## Output layout
 
 ~~~text

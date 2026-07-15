@@ -16,9 +16,9 @@ from spaccbench.scenarios import load_scenario
 
 scenario = load_scenario("tha")
 adata = scenario.adata          # 9773 cells x 550 genes, with obsm['spatial']
-top25_lr = scenario.top25_lr    # list of "ligand-receptor" strings
+candidate_lr = scenario.top25_lr  # expression-informed candidate LR strings
 
-# Run your method workflow on adata and top25_lr,
+# Run your method workflow on adata and candidate_lr,
 # producing a cells x LR pair score matrix.
 ```
 
@@ -82,8 +82,8 @@ helper in [`tools/build_adapter_scores.py`](../tools/build_adapter_scores.py).
 ### Cell alignment
 
 `evaluate()` reindexes your score matrix to `scn.adata.obs_names`. The benchmark
-alignment keeps cell ordering consistent across methods, and D2-D4 are NaN-aware
-for receiver-focused score matrices.
+alignment keeps cell ordering consistent across methods. Missing cells,
+non-numeric values, and unavailable entries are represented as `0.0`.
 
 ### Reusing the four-dimensional machinery
 

@@ -7,8 +7,8 @@ SpaCCBench evaluates spatial cell-cell communication inference methods along
 four complementary dimensions: candidate-pair recovery (D1), expression
 fidelity (D2), spatial coherence (D3), and receptor-pathway concordance (D4).
 It provides a common adapter interface, species-stratified ligand-receptor
-resources, and a reproducible workflow for harmonized cell-by-LR score
-matrices.
+resources, shared score-matrix harmonization, and documented tools for applying
+the benchmark to prepared datasets and method outputs.
 
 ## Benchmark overview
 
@@ -51,6 +51,12 @@ per-cell ligand-receptor score matrices remain outside Git.
 ## Evaluating another method
 
 A method adapter returns a cells-by-LR pandas DataFrame:
+
+This is an integration example, not a no-data smoke test. The installed
+package includes the benchmark code and LR/pathway resources, but the large
+THA and CTX scenario bundles are kept outside Git. Build or obtain a scenario
+bundle as described in [`tools/README.md`](tools/README.md), then set
+`SPACCBENCH_DATA_DIR` before calling `evaluate` with a scenario name.
 
 ~~~python
 import pandas as pd
