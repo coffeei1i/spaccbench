@@ -16,7 +16,7 @@ score matrix.
 | Spacia | https://github.com/yunguan-wang/Spacia | commit 11809bb | sample_cellxLR_spacia.csv |
 | StereoSiTE | official StereoSiTE release | 2.2.2 | sample_LR_intensity_matrix.csv |
 | CellAgentChat | https://github.com/mcgilldinglab/CellAgentChat | 0.1.2 | out/cell_receiving_scores_FINAL.csv |
-| stCASE | https://github.com/STCaser/STCase | 1.0.0 | sample/sample.csv |
+| stCase | https://github.com/STCaser/STCase | 1.0.0 | sample/sample.csv |
 | LARIS | official LARIS workflow | 0.9.3 | sample_prepare_CellByLR.csv |
 | SpaCcLink | https://github.com/LiangYu-Xidian/SpaCcLink | commit bc80c22 | sample_ALL_LR_cellxLR.csv |
 

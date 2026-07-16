@@ -37,7 +37,7 @@ METHODS = [
     "Spacia",
     "StereoSiTE",
     "CellAgentChat",
-    "stCASE",
+    "stCase",
     "LARIS",
     "SpaCcLink",
 ]
@@ -151,8 +151,8 @@ SPECS = {
         ),
         _read_cellagentchat,
     ),
-    "stCASE": MethodSpec(
-        "stCASE",
+    "stCase": MethodSpec(
+        "stCase",
         lambda root, sample: root / "stcase" / sample / f"{sample}.csv",
     ),
     "LARIS": MethodSpec(

@@ -5,7 +5,7 @@ Built-in score-file adapters (external matrices required):
     - COMMOT (COMMOTAdapter)
 
 Methods requiring a supplied adapter or manuscript handoff matrix:
-    - Spacia, StereoSiTE, SPIDER, stLearn, LARIS, CellAgentChat, stCASE, SpaCcLink
+    - Spacia, StereoSiTE, SPIDER, stLearn, LARIS, CellAgentChat, stCase, SpaCcLink
 
 User-supplied adapters should subclass ``BaseAdapter``.
 """

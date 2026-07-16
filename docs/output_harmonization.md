@@ -57,7 +57,7 @@ The shared evaluation loader expects the following final score matrices.
 | SPIDER | `{sample}/{sample}.csv` or first CSV in matched sample directory | Supports exact and suffix-matched sample directories. |
 | Spacia | `{sample}_cellxLR_spacia.csv` | Per-interaction outputs must be aggregated before handoff. |
 | CellAgentChat | `{sample}/out/cell_receiving_scores_FINAL.csv` | The index must already contain cell barcodes; integer indices are not repaired by this loader. |
-| stCASE | `{sample}/{sample}.csv` | Uses the first column as the cell/spot index. |
+| stCase | `{sample}/{sample}.csv` | Uses the first column as the cell/spot index. |
 | SpaCcLink | `{sample}_ALL_LR_cellxLR.csv` or `{sample}_LR_scores.csv` | Converts first `_` separator to `-` when no hyphen is present. |
 
 ## Public adapter contract

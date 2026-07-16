@@ -42,7 +42,7 @@ COMPANION_METHODS: tuple[str, ...] = (
     "stLearn",
     "LARIS",
     "CellAgentChat",
-    "stCASE",
+    "stCase",
     "SpaCcLink",
 )
 
