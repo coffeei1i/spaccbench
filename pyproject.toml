@@ -13,6 +13,8 @@ authors = [
     { name = "Yiheng Xu" },
     { name = "Zimu Zhang" },
     { name = "Shuqi Liu" },
+    { name = "Lifang Wang" },
+    { name = "Youzhe He" },
     { name = "Xiao-Ming Li", email = "lixm@zju.edu.cn" },
     { name = "Bin Yu", email = "yubin007@zju.edu.cn" },
 ]

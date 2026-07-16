@@ -97,16 +97,12 @@ prepared matrices.
 - [`examples/README.md`](examples/README.md) gives the expected directory layout.
 - [`docs/data_access.md`](docs/data_access.md) identifies the source datasets.
 
-This repository does not run the external methods, download their inputs, or
-recreate manuscript figures. Raw datasets, prepared scenarios, and large method
-output matrices are not duplicated in Git.
-
 ## Citation
 
 ~~~bibtex
 @article{spaccbench2026,
   title  = {SpaCCBench: a scenario-aware four-dimensional benchmark for spatial cell-cell communication},
-  author = {Xu, Yiheng and Zhang, Zimu and Liu, Shuqi and Li, Xiao-Ming and Yu, Bin},
+  author = {Xu, Yiheng and Zhang, Zimu and Liu, Shuqi and Wang, Lifang and He, Youzhe and Li, Xiao-Ming and Yu, Bin},
   year   = {2026},
   note   = {Submitted to BMC Bioinformatics}
 }
