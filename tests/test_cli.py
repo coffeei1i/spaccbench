@@ -1,4 +1,5 @@
 """Smoke tests for the CLI."""
+
 import subprocess
 import sys
 
@@ -25,14 +26,16 @@ def test_cli_list_methods():
     assert "LIANA" in out.stdout
     assert "COMMOT" in out.stdout
     assert "Spacia" in out.stdout
-    assert "reference" in out.stdout
-    assert "companion" in out.stdout
+    assert "file-backed" in out.stdout
+    assert "adapter-required" in out.stdout
+    assert "No method score matrices are bundled" in out.stdout
 
 
 def test_cli_list_scenarios():
     out = _run_cli("list-scenarios")
     assert "tha" in out.stdout
     assert "ctx" in out.stdout
+    assert "Metadata only" in out.stdout
 
 
 def test_cli_info_known_scenario():
@@ -48,7 +51,9 @@ def test_cli_info_unknown_scenario_exits_nonzero():
 def test_cli_help_runs():
     result = subprocess.run(
         [sys.executable, "-m", "spaccbench.cli", "--help"],
-        capture_output=True, text=True, timeout=30,
+        capture_output=True,
+        text=True,
+        timeout=30,
     )
     assert result.returncode == 0
     assert "evaluate" in result.stdout
@@ -57,8 +62,7 @@ def test_cli_help_runs():
 
 def test_cli_evaluate_guides_score_generation():
     """The CLI provides a clear score-generation message."""
-    result = _run_cli("evaluate", "--method", "LIANA", "--scenario", "tha",
-                      expect_zero=False)
+    result = _run_cli("evaluate", "--method", "LIANA", "--scenario", "tha", expect_zero=False)
     assert result.returncode != 0
     combined = result.stdout + result.stderr
     assert "build_scenario.py" in combined or "build_adapter_scores" in combined
@@ -67,5 +71,5 @@ def test_cli_evaluate_guides_score_generation():
 def test_cli_list_methods_is_ascii_and_reports_current_status_terms():
     out = _run_cli("list-methods")
     out.stdout.encode("ascii")
-    assert "reference" in out.stdout
-    assert "companion" in out.stdout
+    assert "file-backed" in out.stdout
+    assert "adapter-required" in out.stdout

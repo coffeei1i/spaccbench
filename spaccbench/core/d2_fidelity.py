@@ -4,6 +4,7 @@ Compares each method's per-cell score vector against the expression-derived
 reference signal E (cells × top-25 LR) using four complementary similarity
 measures: Pearson r, Spearman rho, cosine, JS divergence.
 """
+
 from __future__ import annotations
 
 from collections.abc import Iterable
@@ -13,11 +14,9 @@ import pandas as pd
 from scipy.spatial.distance import jensenshannon
 from scipy.stats import pearsonr, spearmanr
 
+from spaccbench.harmonization import normalise_lr_name
+
 _EPS = 1e-12
-
-
-def _normalise_lr(lr: str) -> str:
-    return str(lr).strip().lower().replace("_", "-")
 
 
 def _cosine(a: np.ndarray, b: np.ndarray) -> float:
@@ -96,9 +95,9 @@ def d2_fidelity(
         - ``n_lr``      (int, number of LR pairs contributing)
         - ``per_lr``    (pd.DataFrame: lr × {pearson, spearman, cosine, js})
     """
-    top25 = [_normalise_lr(x) for x in top25_lr]
-    score_cols = {_normalise_lr(c): c for c in scores.columns}
-    ref_cols = {_normalise_lr(c): c for c in reference.columns}
+    top25 = [normalise_lr_name(x) for x in top25_lr]
+    score_cols = {normalise_lr_name(c): c for c in scores.columns}
+    ref_cols = {normalise_lr_name(c): c for c in reference.columns}
 
     common_cells = scores.index.intersection(reference.index)
     if len(common_cells) == 0:

@@ -6,10 +6,14 @@ SpaCCBench Python package.
 - unified_lr_db_mouse.csv: 8,234 mouse ligand-receptor pairs.
 - unified_lr_db_human.csv: 7,056 human ligand-receptor pairs.
 - kegg_mouse.gmt: mouse KEGG pathway gene sets used by the D4 workflow.
+The human LR table is a standalone resource; its presence does not indicate
+that a human evaluation scenario is registered in this package release.
 
-The LR tables were produced by the repository's unified-database construction
-workflow from the eligible native LR resources of the evaluated methods.
-Columns are ligand, receptor, n_sources, and sources.
+
+The LR tables are static benchmark resources. Their `sources` column records
+the contributing LR resources, and `n_sources` gives the corresponding count.
+This package does not rerun the upstream database-construction workflows.
+Columns are `ligand`, `receptor`, `n_sources`, and `sources`.
 
 Large prepared scenario files are intentionally not versioned in Git. Put
 tha.h5ad, ctx.h5ad, their candidate tables, expression-reference matrices,

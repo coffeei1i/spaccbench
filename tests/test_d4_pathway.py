@@ -1,4 +1,5 @@
 """Unit tests for D4 pathway AUC and permutation."""
+
 import numpy as np
 import pandas as pd
 
@@ -31,10 +32,12 @@ def test_compute_auc_constant_score_returns_nan():
 
 
 def test_receptor_to_pathways_truncation():
-    kegg = pd.DataFrame({
-        "source": [f"pw{i}" for i in range(30)],
-        "target": ["Gene1"] * 30,
-    })
+    kegg = pd.DataFrame(
+        {
+            "source": [f"pw{i}" for i in range(30)],
+            "target": ["Gene1"] * 30,
+        }
+    )
     out = receptor_to_pathways(kegg, max_pw=20)
     assert "gene1" in out
     assert len(out["gene1"]) == 20
@@ -59,13 +62,19 @@ def test_d4_full_pipeline_simple_case():
         {"lig1-rec1": pw_act["Wnt"].values},
         index=cells,
     )
-    kegg = pd.DataFrame({
-        "source": ["Wnt", "BMP", "Notch"],
-        "target": ["Rec1", "Rec1", "Rec1"],
-    })
+    kegg = pd.DataFrame(
+        {
+            "source": ["Wnt", "BMP", "Notch"],
+            "target": ["Rec1", "Rec1", "Rec1"],
+        }
+    )
     out = d4_pathway(
-        scores=scores, pw_act=pw_act, top25_lr=["lig1-rec1"],
-        kegg=kegg, n_perm=20, seed=0,
+        scores=scores,
+        pw_act=pw_act,
+        top25_lr=["lig1-rec1"],
+        kegg=kegg,
+        n_perm=20,
+        seed=0,
     )
     assert out["n_lr"] == 1
     assert out["mean_auc"] > 0.99  # perfect classifier
@@ -80,3 +89,17 @@ def test_d4_no_perm_returns_nan_pvalue():
     kegg = pd.DataFrame({"source": ["Wnt"], "target": ["Rec1"]})
     out = d4_pathway(scores, pw_act, ["lig1-rec1"], kegg, n_perm=0)
     assert np.isnan(out["perm_p"])
+
+
+def test_d4_resolves_receptor_when_ligand_contains_hyphen():
+    cells = [f"c{i}" for i in range(20)]
+    activity = np.arange(20, dtype=float)
+    scores = pd.DataFrame({"H2-aa-Cd4": activity}, index=cells)
+    pw_act = pd.DataFrame({"T cell": activity}, index=cells)
+    kegg = pd.DataFrame({"source": ["T cell"], "target": ["Cd4"]})
+
+    out = d4_pathway(scores, pw_act, ["H2-aa-Cd4"], kegg, n_perm=0)
+
+    assert out["n_lr"] == 1
+    assert out["per_lr"].iloc[0]["ligand"] == "h2-aa"
+    assert out["per_lr"].iloc[0]["receptor"] == "cd4"

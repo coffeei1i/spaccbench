@@ -1,7 +1,8 @@
-"""COMMOT reference adapter.
+"""COMMOT score-file adapter.
 
-Loads pre-computed COMMOT cell × LR score matrices shipped with the package.
+Loads externally prepared COMMOT cell × LR matrices by standardized filename.
 """
+
 from __future__ import annotations
 
 from spaccbench.adapters._csv_backed import CsvBackedAdapter

@@ -10,6 +10,7 @@ Significance is assessed by permuting the receptor -> pathway mapping (the
 candidate count and max-aggregation are preserved), recomputing the method
 mean AUC, and comparing the observed value against the permutation null.
 """
+
 from __future__ import annotations
 
 from collections.abc import Iterable
@@ -19,14 +20,13 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import roc_auc_score
 
+from spaccbench.harmonization import normalise_lr_name
+
 _EPS = 1e-12
 
 
-def _normalise_lr(lr: str) -> str:
-    return str(lr).strip().lower().replace("_", "-")
-
-
 # ----- KEGG loading -----------------------------------------------------------
+
 
 def load_gmt(gmt_path: str | Path) -> pd.DataFrame:
     """Load a GMT file into a long-format DataFrame with columns
@@ -62,6 +62,7 @@ def receptor_to_pathways(
 
 # ----- Pathway activity (GSVA via decoupleR) ----------------------------------
 
+
 def compute_pathway_activity(
     adata,
     kegg: pd.DataFrame,
@@ -82,6 +83,7 @@ def compute_pathway_activity(
     if "log1p" not in adata.layers and adata.X.max() > 50:
         # Crude check: if X looks like raw counts, log1p it on the fly.
         import scanpy as sc
+
         adata = adata.copy()
         sc.pp.normalize_total(adata, target_sum=1e4)
         sc.pp.log1p(adata)
@@ -98,11 +100,14 @@ def compute_pathway_activity(
     return pd.DataFrame(
         pw_act.values if hasattr(pw_act, "values") else pw_act,
         index=adata.obs_names,
-        columns=adata.uns.get("gsva_estimate_columns", pw_act.columns) if hasattr(pw_act, "columns") else None,
+        columns=adata.uns.get("gsva_estimate_columns", pw_act.columns)
+        if hasattr(pw_act, "columns")
+        else None,
     )
 
 
 # ----- AUC ---------------------------------------------------------------------
+
 
 def compute_auc(
     lr_score: np.ndarray,
@@ -138,6 +143,7 @@ def compute_auc(
 
 # ----- Method-level mean AUC ---------------------------------------------------
 
+
 def _per_lr_best_auc(
     scores: pd.DataFrame,
     pw_act: pd.DataFrame,
@@ -146,17 +152,26 @@ def _per_lr_best_auc(
     top_pct: float,
 ) -> pd.DataFrame:
     """For each LR pair, compute max-AUC over its candidate pathways."""
-    top25 = [_normalise_lr(x) for x in top25_lr]
-    score_cols = {_normalise_lr(c): c for c in scores.columns}
+    top25 = [normalise_lr_name(x) for x in top25_lr]
+    score_cols = {normalise_lr_name(c): c for c in scores.columns}
     common_cells = scores.index.intersection(pw_act.index)
 
     rows = []
     for lr in top25:
         if lr not in score_cols:
             continue
-        try:
-            lig, rec = lr.split("-", 1)
-        except ValueError:
+        parts = lr.split("-")
+        lig = None
+        rec = None
+        for split_at in range(1, len(parts)):
+            candidate = "-".join(parts[split_at:])
+            if candidate in rec_to_pw:
+                lig = "-".join(parts[:split_at])
+                rec = candidate
+                break
+        if rec is None:
+            continue
+        if lig is None:
             continue
         m_vec = scores.loc[common_cells, score_cols[lr]].to_numpy(dtype=float)
         if not np.isfinite(m_vec).any() or np.nanmax(np.abs(m_vec)) < _EPS:
@@ -174,14 +189,16 @@ def _per_lr_best_auc(
                 best_auc, best_pw = auc, p
         if best_pw is None:
             continue
-        rows.append({
-            "lr": lr,
-            "ligand": lig,
-            "receptor": rec,
-            "best_pathway": best_pw,
-            "best_auc": best_auc,
-            "n_candidate": len(candidates_in_pw),
-        })
+        rows.append(
+            {
+                "lr": lr,
+                "ligand": lig,
+                "receptor": rec,
+                "best_pathway": best_pw,
+                "best_auc": best_auc,
+                "n_candidate": len(candidates_in_pw),
+            }
+        )
     return pd.DataFrame(rows)
 
 
@@ -270,7 +287,9 @@ def d4_pathway(
         for _ in range(n_perm):
             rec_to_pw_null = _permute_rec_to_pw(rec_to_pw, all_pathways, rng)
             null_detail = _per_lr_best_auc(scores, pw_act, top25_lr, rec_to_pw_null, top_pct)
-            null_means.append(float(null_detail["best_auc"].mean()) if len(null_detail) else float("nan"))
+            null_means.append(
+                float(null_detail["best_auc"].mean()) if len(null_detail) else float("nan")
+            )
         nulls = np.asarray(null_means)
         nulls_finite = nulls[np.isfinite(nulls)]
         if len(nulls_finite):

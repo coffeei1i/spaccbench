@@ -20,11 +20,13 @@ class BaseAdapter(ABC):
     Examples
     --------
     >>> from spaccbench import BaseAdapter, evaluate
+    >>> import pandas as pd
     >>> class MyAdapter(BaseAdapter):
     ...     name = "MyMethod"
     ...     def load_scores(self, scenario):
     ...         return pd.read_csv(f"my_outputs/{scenario}.csv", index_col=0)
     >>> result = evaluate(method=MyAdapter(), scenario="tha")
+    >>> # Requires a prepared "tha" scenario through SPACCBENCH_DATA_DIR.
     """
 
     name: str = "BaseAdapter"

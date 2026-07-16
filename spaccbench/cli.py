@@ -7,6 +7,7 @@ Usage:
     spaccbench list-scenarios
     spaccbench version
 """
+
 from __future__ import annotations
 
 import argparse
@@ -46,10 +47,12 @@ def _build_parser() -> argparse.ArgumentParser:
     )
 
     # list-methods
-    sub.add_parser("list-methods", help="Print available methods and their bundle status")
+    sub.add_parser("list-methods", help="Print registered methods and adapter requirements")
 
     # list-scenarios
-    sub.add_parser("list-scenarios", help="Print available scenarios with metadata")
+    sub.add_parser(
+        "list-scenarios", help="Print registered scenario metadata; prepared files required"
+    )
 
     # info
     pi = sub.add_parser("info", help="Print scenario metadata")
@@ -83,7 +86,7 @@ def _summarise(result: dict) -> str:
         )
     if "d4" in result:
         d = result["d4"]
-        p_str = f"{d['perm_p']:.3g}" if d['perm_p'] == d['perm_p'] else "n/a"  # NaN check
+        p_str = f"{d['perm_p']:.3g}" if d["perm_p"] == d["perm_p"] else "n/a"  # NaN check
         lines.append(
             f"D4 (pathway):   mean AUC={d['mean_auc']:.3f}  "
             f"perm_p={p_str}  n_sig_lr={d['n_sig_lr']}"
@@ -116,6 +119,7 @@ def _to_json_safe(result: dict) -> dict:
 
 def cmd_evaluate(args: argparse.Namespace) -> int:
     from spaccbench import evaluate
+
     result = evaluate(
         method=args.method,
         scenario=args.scenario,
@@ -143,26 +147,33 @@ def cmd_list_methods(args: argparse.Namespace) -> int:
         status: sum(row["status"] == status for row in rows)
         for status in {row["status"] for row in rows}
     }
-    summary = ", ".join(
-        f"{count} {status}" for status, count in sorted(counts.items())
-    )
+    summary = ", ".join(f"{count} {status}" for status, count in sorted(counts.items()))
     print(f"\n{summary}. See docs/extending.md to add your own method.")
+    print("No method score matrices are bundled. See docs/extending.md and")
+    print("examples/README.md for the required external inputs.")
     return 0
 
 
 def cmd_list_scenarios(args: argparse.Namespace) -> int:
     from spaccbench import list_scenarios
+
     rows = list_scenarios()
     for r in rows:
-        print(f"  {r['name']:<8}  {r['platform']:<10}  {r['n_cells_expected']:>6} cells  {r['title']}")
+        print(
+            f"  {r['name']:<8}  {r['platform']:<10}  {r['n_cells_expected']:>6} cells  {r['title']}"
+        )
+    print("\nMetadata only; scenario files must be supplied through SPACCBENCH_DATA_DIR.")
     return 0
 
 
 def cmd_info(args: argparse.Namespace) -> int:
     from spaccbench.scenarios import SCENARIO_REGISTRY
+
     if args.scenario not in SCENARIO_REGISTRY:
-        print(f"Unknown scenario {args.scenario!r}. Available: "
-              f"{sorted(SCENARIO_REGISTRY)}", file=sys.stderr)
+        print(
+            f"Unknown scenario {args.scenario!r}. Available: {sorted(SCENARIO_REGISTRY)}",
+            file=sys.stderr,
+        )
         return 1
     meta = SCENARIO_REGISTRY[args.scenario]
     for k, v in meta.items():
@@ -181,11 +192,11 @@ def cmd_version(args: argparse.Namespace) -> int:
 
 
 COMMANDS = {
-    "evaluate":       cmd_evaluate,
-    "list-methods":   cmd_list_methods,
+    "evaluate": cmd_evaluate,
+    "list-methods": cmd_list_methods,
     "list-scenarios": cmd_list_scenarios,
-    "info":           cmd_info,
-    "version":        cmd_version,
+    "info": cmd_info,
+    "version": cmd_version,
 }
 
 

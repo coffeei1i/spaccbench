@@ -1,4 +1,5 @@
 """Unit tests for D1 detection."""
+
 import numpy as np
 import pandas as pd
 
@@ -7,9 +8,7 @@ from spaccbench.core import d1_detection
 
 def test_d1_exact_count():
     scores = pd.DataFrame(
-        {"lig1-rec1": [1.0, 0.0, 2.0],
-         "lig2-rec2": [0.0, 0.0, 0.0],
-         "lig3-rec3": [3.0, 1.0, 0.0]},
+        {"lig1-rec1": [1.0, 0.0, 2.0], "lig2-rec2": [0.0, 0.0, 0.0], "lig3-rec3": [3.0, 1.0, 0.0]},
         index=["c1", "c2", "c3"],
     )
     out = d1_detection(scores, top25_lr=["lig1-rec1", "lig2-rec2", "lig3-rec3", "lig4-rec4"])
@@ -58,3 +57,10 @@ def test_d1_empty_top25():
     assert out["n_hit"] == 0
     assert out["n_total"] == 0
     assert np.isnan(out["fraction"])
+
+
+def test_d1_matches_first_receptor_without_corrupting_hyphenated_ligand():
+    scores = pd.DataFrame({"H2-aa-Cd4": [1.0, 2.0]}, index=["c1", "c2"])
+    out = d1_detection(scores, top25_lr=["H2-aa-Cd4_Cd8a"])
+
+    assert out["n_hit"] == 1

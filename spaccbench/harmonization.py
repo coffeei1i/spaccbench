@@ -17,15 +17,13 @@ def normalise_lr_name(value: object) -> str:
     for separator in ("::", "|", "^"):
         name = name.replace(separator, "-")
 
-    if "-" in name:
-        ligand, receptor = name.split("-", 1)
-    elif "_" in name:
+    if "-" not in name and "_" in name:
         ligand, receptor = name.split("_", 1)
-    else:
-        return name
+        name = f"{ligand}-{receptor}"
 
-    receptor = receptor.split("_", 1)[0].split("-", 1)[0]
-    return f"{ligand}-{receptor}"
+    # Keep the first receptor in a complex without splitting valid gene symbols
+    # such as H2-aa or HLA-DRA at their internal hyphens.
+    return name.split("_", 1)[0]
 
 
 def harmonize_score_matrix(

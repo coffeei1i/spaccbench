@@ -1,4 +1,4 @@
-# Manuscript reproduction entry point
+# Shared manuscript-metric entry point
 
 run_benchmark.py applies the shared SpaCCBench D1-D4 calculations to harmonized
 cell-by-LR matrices from the ten methods evaluated in the manuscript.
@@ -15,16 +15,20 @@ cell-by-LR matrices from the ten methods evaluated in the manuscript.
 python manuscript_scripts/run_benchmark.py \
   --outputs examples/method_outputs \
   --scenarios tha ctx \
-  --out manuscript_outputs/spaccbench_results.csv
+  --out manuscript_outputs/spaccbench_results.csv \
+  --require-all
 ~~~
 
-Use --require-all for a complete ten-method run. Without it, missing method
-outputs are reported and available methods are evaluated.
+The complete THA/CTX command uses `--require-all` so a missing method matrix
+cannot silently produce a partial comparison. Omit it only for an explicitly
+incomplete exploratory run.
 
 ## Outputs
 
 - spaccbench_results.csv: raw D1-D4 metrics by method and scenario.
 - spaccbench_results_cohort.csv: rank scores and geometric composites.
 
-These tables are the lightweight figure-table inputs. Raw public datasets and
-large cell-level method outputs remain outside the Git repository.
+These are metric and cohort tables, not finished manuscript figures. This
+script does not download datasets, run external methods, or apply final figure
+formatting. Raw public datasets and large cell-level method outputs remain
+outside the Git repository.

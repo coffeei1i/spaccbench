@@ -4,14 +4,14 @@ This guide shows how to evaluate a new spatial CCC method with the SpaCCBench
 framework. The adapter interface uses a single artefact: a cells x LR score
 matrix wrapped in a minimal adapter class.
 
-Set SPACCBENCH_DATA_DIR to the directory containing prepared scenario files before loading a registered scenario.
+Set `SPACCBENCH_DATA_DIR` to the directory containing prepared scenario files
+before loading a registered scenario.
 
 ## 1. Generate your method scores
 
 For a scenario such as `tha`, run your method on the scenario AnnData:
 
 ```python
-import anndata as ad
 from spaccbench.scenarios import load_scenario
 
 scenario = load_scenario("tha")
@@ -26,7 +26,8 @@ The expected output is a `pandas.DataFrame`:
 
 - **Index**: cell barcodes matching `scenario.adata.obs_names`.
 - **Columns**: `"ligand-receptor"` strings, lowercased with `-` separator, such as `"agt-agtr1a"`.
-- **Values**: per-cell scores as floats; `NaN` values follow the standard SpaCCBench alignment rules.
+- **Values**: per-cell scores coercible to floats; unavailable or non-numeric
+  entries are converted to `0.0` during evaluation.
 
 ## 2. Write your adapter
 
@@ -45,15 +46,22 @@ class MyMethodAdapter(BaseAdapter):
 
 adapter = MyMethodAdapter(scores_dir="./my_outputs")
 result = evaluate(method=adapter, scenario="tha")
-print(result["composite_geo"])
+print(result["d1"]["fraction"])
+print(result["d2"]["pearson_r"])
 ```
 
-Your method now produces D1-D4 numbers comparable to the ten methods in the
-SpaCCBench paper.
+This computes D1-D4 with the same implementation used for the manuscript
+methods. A rank-based composite is defined only after results from methods on
+the same prepared scenario are combined as a cohort.
 
-## 3. Cohort-level ranking
+## 3. Cohort-level comparison
 
-To rank your method against the reference baselines:
+The LIANA and COMMOT names below use built-in score-file adapters; their
+prepared `liana_<scenario>_scores` and `commot_<scenario>_scores` files must
+also exist under `SPACCBENCH_DATA_DIR`. They are comparison methods, not
+bundled baselines.
+
+To compare the three prepared methods:
 
 ```python
 from spaccbench import compose_cohort, evaluate
@@ -68,16 +76,17 @@ print(table[["d1_fraction", "d2_pearson_r", "d3_morans_i", "d4_mean_auc",
 ```
 
 The `composite_geo` column is the geometric mean of the four rank-normalised
-scores (see paper Methods Section 2.2 / Eq. for `Composite_geo`).
+scores described in the manuscript Methods.
 
 ## 4. Tips
 
 ### Column-name normalisation
 
-Internally all LR strings are normalised to lowercase, hyphen-separated. The
-adapter can standardize this during loading. For example, if your raw output
-uses `"FN1_CD44"` or `"FN1|CD44"`, normalise at adapter load time or use the
-helper in [`tools/build_adapter_scores.py`](../tools/build_adapter_scores.py).
+`evaluate()` normalises common pair separators, numeric values, and duplicate
+LR columns through `spaccbench.harmonize_score_matrix`. Canonical keys retain
+hyphens inside gene symbols, such as `H2-aa-Cd4`. The preparation helper
+[`tools/build_adapter_scores.py`](../tools/build_adapter_scores.py) applies the
+same rules before writing parquet.
 
 ### Cell alignment
 

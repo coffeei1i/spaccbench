@@ -3,6 +3,7 @@
 from types import SimpleNamespace
 
 import pandas as pd
+import pytest
 
 from manuscript_scripts.run_benchmark import _spider_path
 from spaccbench.evaluate import _align_scores_to_adata
@@ -48,3 +49,24 @@ def test_spider_path_falls_back_to_first_csv_in_matching_directory(tmp_path):
     fallback.write_text("cell,a-b\nc1,1\n", encoding="utf-8")
 
     assert _spider_path(tmp_path, "CTX") == fallback
+
+
+def test_normalise_lr_name_preserves_hyphens_inside_gene_symbols():
+    assert normalise_lr_name("H2-aa-Cd4") == "h2-aa-cd4"
+    assert normalise_lr_name("HLA-DRA::CD4") == "hla-dra-cd4"
+
+
+def test_evaluate_alignment_rejects_zero_barcode_overlap():
+    scenario = SimpleNamespace(adata=SimpleNamespace(obs_names=pd.Index(["cell1", "cell2"])))
+    scores = pd.DataFrame({"A_B": [1.0, 2.0]}, index=[0, 1])
+
+    with pytest.raises(ValueError, match="no cell barcodes"):
+        _align_scores_to_adata(scores, scenario)
+
+
+def test_evaluate_alignment_rejects_empty_matrix():
+    scenario = SimpleNamespace(adata=SimpleNamespace(obs_names=pd.Index(["cell1"])))
+    scores = pd.DataFrame()
+
+    with pytest.raises(ValueError, match="at least one row"):
+        _align_scores_to_adata(scores, scenario)

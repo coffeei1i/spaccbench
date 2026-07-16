@@ -1,12 +1,9 @@
 """SpaCCBench: four-dimensional benchmark for spatial cell-cell communication inference.
 
-Public API:
-
-    >>> from spaccbench import evaluate, load_scenario, BaseAdapter
-    >>> result = evaluate(method="LIANA", scenario="tha")
-    >>> print(result["d2"]["pearson_r"])
-
-See https://github.com/coffeei1i/spaccbench for documentation.
+Public functions include `evaluate`, `load_scenario`, `load_lr_db`, and
+`BaseAdapter`. Prepared scenarios and method score matrices are external
+inputs; they are not bundled with the package. See the project documentation
+for input requirements and examples.
 """
 
 from __future__ import annotations
@@ -14,6 +11,7 @@ from __future__ import annotations
 from spaccbench._version import __version__
 from spaccbench.adapters import (
     ALL_ADAPTERS,
+    FILE_BACKED_ADAPTERS,
     REFERENCE_ADAPTERS,
     BaseAdapter,
     COMMOTAdapter,
@@ -61,6 +59,7 @@ __all__ = [
     "get_adapter",
     "list_methods",
     "REFERENCE_ADAPTERS",
+    "FILE_BACKED_ADAPTERS",
     "ALL_ADAPTERS",
     # Types
     "Scenario",

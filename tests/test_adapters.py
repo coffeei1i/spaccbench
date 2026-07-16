@@ -1,9 +1,11 @@
 """Smoke tests for the adapter layer."""
+
 import pandas as pd
 import pytest
 
 from spaccbench.adapters import (
     ALL_ADAPTERS,
+    FILE_BACKED_ADAPTERS,
     REFERENCE_ADAPTERS,
     BaseAdapter,
     COMMOTAdapter,
@@ -19,6 +21,7 @@ def test_reference_adapters_registered():
     assert "COMMOT" in REFERENCE_ADAPTERS
     assert isinstance(REFERENCE_ADAPTERS["LIANA"], LIANAAdapter)
     assert isinstance(REFERENCE_ADAPTERS["COMMOT"], COMMOTAdapter)
+    assert REFERENCE_ADAPTERS is FILE_BACKED_ADAPTERS
 
 
 def test_all_eight_companion_methods_registered():
@@ -28,10 +31,10 @@ def test_all_eight_companion_methods_registered():
 
 def test_list_methods_status_counts():
     rows = list_methods()
-    bundled = [r for r in rows if r["status"] == "reference"]
-    companion = [r for r in rows if r["status"] == "companion"]
-    assert len(bundled) == 2
-    assert len(companion) == len(COMPANION_METHODS)
+    file_backed = [r for r in rows if r["status"] == "file-backed"]
+    adapter_required = [r for r in rows if r["status"] == "adapter-required"]
+    assert len(file_backed) == 2
+    assert len(adapter_required) == len(COMPANION_METHODS)
 
 
 def test_get_adapter_case_insensitive():
@@ -57,6 +60,7 @@ def test_companion_adapter_points_to_adapter_workflow():
 def test_custom_adapter_subclass_works():
     class MyAdapter(BaseAdapter):
         name = "MyMethod"
+
         def load_scores(self, scenario):
             return pd.DataFrame({"lig1-rec1": [1.0]}, index=["c1"])
 
@@ -70,16 +74,19 @@ def test_baseadapter_cannot_be_instantiated_directly():
         BaseAdapter()
 
 
-def test_reference_adapter_guides_score_generation():
-    """The reference adapter message points to the score-generation script."""
+def test_file_backed_adapter_guides_score_generation():
+    """The file-backed adapter explains every required preparation option."""
     adapter = LIANAAdapter()
     with pytest.raises(FileNotFoundError) as exc:
         adapter.load_scores("tha")
     msg = str(exc.value)
     assert "liana_tha_scores" in msg
     assert "tools/build_adapter_scores.py" in msg
+    assert "--input-csv" in msg
+    assert "--output-dir" in msg
 
-def test_reference_adapter_loads_external_scores(tmp_path, monkeypatch):
+
+def test_file_backed_adapter_loads_external_scores(tmp_path, monkeypatch):
     scores = pd.DataFrame(
         {"Lig1_Rec1": [1.0, 2.0]},
         index=["cell1", "cell2"],

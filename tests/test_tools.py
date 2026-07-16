@@ -6,6 +6,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pandas as pd
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -48,3 +49,28 @@ def test_parquet_and_pathway_extras_are_declared():
     assert "data = [" in text
     assert '"pyarrow>=10"' in text
     assert '"decoupler>=1.9,<2"' in text
+
+
+def test_result_examples_use_one_unambiguous_metric_schema():
+    expected_columns = [
+        "display",
+        "d1_raw",
+        "d2_raw",
+        "d3_raw",
+        "d4_raw",
+        "d1_rank_score",
+        "d2_rank_score",
+        "d3_rank_score",
+        "d4_rank_score",
+        "composite_geo",
+    ]
+
+    for filename in (
+        "THA_method_scores.csv",
+        "CTX_method_scores.csv",
+    ):
+        table = pd.read_csv(ROOT / "examples" / "results" / filename)
+
+        assert list(table.columns) == expected_columns
+        assert len(table) == 10
+        assert table["display"].is_unique

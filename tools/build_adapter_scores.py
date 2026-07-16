@@ -3,6 +3,9 @@
 Reads a final cell-by-LR CSV or parquet input and
 emits a clean cells × LR-pair parquet file consumable by
 ``spaccbench.adapters.CsvBackedAdapter``.
+The tool standardizes a file; it does not register a method adapter. LIANA and
+COMMOT have built-in file-backed adapters. Other methods still require a
+custom adapter or the manuscript handoff layout.
 
 Output format:
   - Path: ``<output_dir>/<method>_<scenario>_scores.parquet``

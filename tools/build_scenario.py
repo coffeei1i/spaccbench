@@ -50,7 +50,7 @@ def parse_args():
         "--output-dir",
         required=True,
         type=Path,
-        help="Where to write the bundled files (typically spaccbench/data/)",
+        help="External directory for the prepared scenario files",
     )
     p.add_argument("--top-n", type=int, default=25, help="Top N LR pairs (default 25)")
     p.add_argument(

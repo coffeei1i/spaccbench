@@ -2,7 +2,8 @@
 
 Put method outputs under examples/method_outputs or pass --outputs, then run:
 
-    python manuscript_scripts/run_benchmark.py --outputs examples/method_outputs
+    python manuscript_scripts/run_benchmark.py --outputs examples/method_outputs \
+        --require-all
 
 The script passes each final cell-by-LR score matrix to spaccbench.evaluate.
 """

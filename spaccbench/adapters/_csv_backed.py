@@ -14,8 +14,9 @@ from spaccbench.resources import resolve_data_file
 class CsvBackedAdapter(BaseAdapter):
     """Adapter that loads prepared CSV/parquet scores.
 
-    The default score path follows the convention:
-        ``spaccbench/data/{method_name_lower}_{scenario}_scores.{csv|parquet}``
+    The score filename follows
+    ``{method_name_lower}_{scenario}_scores.{csv|parquet}`` and is resolved
+    through ``SPACCBENCH_DATA_DIR``. No method score matrices are bundled.
 
     Override the class attributes ``name`` and ``file_template`` in subclasses.
     """
@@ -33,9 +34,10 @@ class CsvBackedAdapter(BaseAdapter):
                 continue
 
         raise FileNotFoundError(
-            f"Prepare {self.name} scores as {filename!r} or CSV with "
-            f"python tools/build_adapter_scores.py --method {self.name} "
-            f"--scenario {scenario}."
+            f"Prepare {self.name} scores as {filename!r} or CSV. "
+            "tools/build_adapter_scores.py requires --method, --scenario, "
+            "--input-csv, and --output-dir; set SPACCBENCH_DATA_DIR to that "
+            "output directory before evaluation."
         )
 
     @staticmethod

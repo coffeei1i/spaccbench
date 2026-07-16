@@ -8,6 +8,7 @@ For each pair (L, R) in the per-sample top-25 list, recovery is defined as:
 Method-level statistic is the hit count n_hit = sum det, reported as
 n_hit / 25.
 """
+
 from __future__ import annotations
 
 from collections.abc import Iterable
@@ -15,9 +16,7 @@ from collections.abc import Iterable
 import numpy as np
 import pandas as pd
 
-
-def _normalise_lr(lr: str) -> str:
-    return str(lr).strip().lower().replace("_", "-")
+from spaccbench.harmonization import normalise_lr_name
 
 
 def d1_detection(
@@ -42,8 +41,8 @@ def d1_detection(
         - ``"fraction"`` : float, n_hit / len(top25_lr).
         - ``"per_lr"`` : pd.DataFrame with columns ``lr``, ``detected``.
     """
-    top25 = [_normalise_lr(x) for x in top25_lr]
-    score_cols_norm = {_normalise_lr(c): c for c in scores.columns}
+    top25 = [normalise_lr_name(x) for x in top25_lr]
+    score_cols_norm = {normalise_lr_name(c): c for c in scores.columns}
 
     rows = []
     for lr in top25:

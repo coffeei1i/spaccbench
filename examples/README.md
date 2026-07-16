@@ -3,10 +3,15 @@
 This directory contains notebooks and the expected layout for harmonized method
 outputs. Prepared scenario files must be available through
 SPACCBENCH_DATA_DIR.
+`examples/method_outputs/` is intentionally absent from a fresh clone and is
+ignored by Git; users must populate it with final external-method matrices.
 
-The single end-to-end notebook,
-`evaluate_all_methods_CTX_THA.ipynb`, is the canonical workflow for all
-available manuscript method outputs on THA and CTX.
+
+The shared evaluation notebook, `evaluate_all_methods_CTX_THA.ipynb`, runs
+the D1-D4 layer after both scenario bundles and all selected method outputs
+have been prepared. It does not download data, run the external methods, or
+construct their cell-by-LR matrices. Missing inputs are treated as errors in
+the complete ten-method workflow.
 
 ## Output layout
 
@@ -40,7 +45,10 @@ examples/method_outputs/
 python manuscript_scripts/run_benchmark.py \
   --outputs examples/method_outputs \
   --scenarios tha ctx \
-  --out manuscript_outputs/spaccbench_results.csv
+  --out manuscript_outputs/spaccbench_results.csv \
+  --require-all
 ~~~
 
-The command accepts --methods and --scenarios for selected subsets.
+Use `--methods` or `--scenarios` only when an intentionally incomplete
+subset is required. Such output is not the complete ten-method THA/CTX
+comparison.

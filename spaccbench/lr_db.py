@@ -1,8 +1,10 @@
 """Unified ligand-receptor database accessor.
 
-Provides the merged LR resource (10 methods, species-stratified) as a
-standalone community resource. See Methods §S1.3 of the SpaCCBench paper.
+Provides the species-stratified merged LR tables used by SpaCCBench. Each row
+records its contributing resources in `sources`; the tables are not method
+score outputs.
 """
+
 from __future__ import annotations
 
 import pandas as pd
@@ -36,9 +38,7 @@ def load_lr_db(species: str) -> pd.DataFrame:
     """
     species_lower = species.strip().lower()
     if species_lower not in {"mouse", "human"}:
-        raise ValueError(
-            f"species must be 'mouse' or 'human', got {species!r}"
-        )
+        raise ValueError(f"species must be 'mouse' or 'human', got {species!r}")
 
     filename = f"unified_lr_db_{species_lower}.csv"
     try:

@@ -8,6 +8,7 @@ row-normalised k-nearest-neighbour weight matrix:
 
 The kNN weight matrix uses k=6 neighbours, excluding self.
 """
+
 from __future__ import annotations
 
 from collections.abc import Iterable
@@ -17,11 +18,9 @@ import pandas as pd
 from scipy.sparse import csr_matrix
 from scipy.spatial import cKDTree
 
+from spaccbench.harmonization import normalise_lr_name
+
 _EPS = 1e-12
-
-
-def _normalise_lr(lr: str) -> str:
-    return str(lr).strip().lower().replace("_", "-")
 
 
 def build_knn_weights(coords: np.ndarray, k: int = 6) -> csr_matrix:
@@ -110,8 +109,8 @@ def d3_spatial(
     -------
     dict with keys ``morans_i``, ``gearys_c``, ``n_lr``, ``per_lr``.
     """
-    top25 = [_normalise_lr(x) for x in top25_lr]
-    score_cols = {_normalise_lr(c): c for c in scores.columns}
+    top25 = [normalise_lr_name(x) for x in top25_lr]
+    score_cols = {normalise_lr_name(c): c for c in scores.columns}
 
     if W is None:
         W = build_knn_weights(coords, k=k)
@@ -127,11 +126,13 @@ def d3_spatial(
         if np.isnan(x).any():
             mean_val = np.nanmean(x)
             x = np.where(np.isnan(x), mean_val, x)
-        rows.append({
-            "lr": lr,
-            "morans_i": morans_i(x, W),
-            "gearys_c": gearys_c(x, W),
-        })
+        rows.append(
+            {
+                "lr": lr,
+                "morans_i": morans_i(x, W),
+                "gearys_c": gearys_c(x, W),
+            }
+        )
 
     per_lr = pd.DataFrame(rows)
     if per_lr.empty:

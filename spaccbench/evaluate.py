@@ -134,8 +134,19 @@ def _align_scores_to_adata(scores: pd.DataFrame, scn: Scenario) -> pd.DataFrame:
 
     Cells present in adata but missing from scores get zero-filled rows.
     Cells in scores not in adata are dropped.
+    Empty matrices and matrices with no matching cell barcodes are rejected.
     """
-    return harmonize_score_matrix(scores, cell_index=scn.adata.obs_names)
+    if scores.shape[0] == 0 or scores.shape[1] == 0:
+        raise ValueError("Method scores must contain at least one row and one LR column.")
+
+    obs_names = pd.Index([str(value) for value in scn.adata.obs_names])
+    score_names = pd.Index([str(value) for value in scores.index])
+    if score_names.intersection(obs_names).empty:
+        raise ValueError(
+            "Method scores have no cell barcodes in common with the scenario. "
+            "Integer or positional row indices must be converted before evaluation."
+        )
+    return harmonize_score_matrix(scores, cell_index=obs_names)
 
 
 # ----- Cohort-level composite -------------------------------------------------

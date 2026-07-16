@@ -1,4 +1,5 @@
 """Resolve small packaged resources and externally prepared scenario data."""
+
 from __future__ import annotations
 
 import os
@@ -9,9 +10,9 @@ from pathlib import Path
 def resolve_data_file(filename: str) -> Path:
     """Return a data file from SPACCBENCH_DATA_DIR or package data.
 
-    Large prepared scenario files can be kept outside the Git repository by
-    setting SPACCBENCH_DATA_DIR. Small reusable resources remain bundled with
-    the installed package.
+    Large prepared scenario files are not packaged and must be supplied through
+    SPACCBENCH_DATA_DIR. Small reusable resources remain bundled with the
+    installed package.
     """
     external = os.environ.get("SPACCBENCH_DATA_DIR")
     if external:
@@ -29,7 +30,5 @@ def resolve_data_file(filename: str) -> Path:
     if external:
         locations.insert(0, f"SPACCBENCH_DATA_DIR={external}")
     raise FileNotFoundError(
-        f"SpaCCBench data file {filename!r} was not found in "
-        + " or ".join(locations)
-        + "."
+        f"SpaCCBench data file {filename!r} was not found in " + " or ".join(locations) + "."
     )

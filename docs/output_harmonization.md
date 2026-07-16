@@ -14,10 +14,11 @@ Each evaluated method is represented as a `pandas.DataFrame`:
 | Columns | Ligand-receptor pairs formatted as `Ligand-Receptor` |
 | Values | Per-cell or per-spot communication scores; larger values mean stronger inferred communication |
 
-For methods that naturally emit sender-receiver or cell-type-level outputs, the
-manuscript wrappers extract or aggregate the receiver-side per-cell/spot score
-used for the benchmark. Once a matrix has this shape, the same D1-D4 scoring
-functions are used for every method.
+Methods that naturally emit sender-receiver or cell-type-level outputs must be
+converted to receiver-side per-cell/spot scores before handoff. The public
+benchmark loader reads the final cell-by-LR matrix; it does not perform each
+external method's native aggregation. Once a matrix has this shape, the same
+D1-D4 functions are used for every method.
 
 ## Normalization rules used in the manuscript scripts
 
@@ -27,35 +28,36 @@ function. The key rules are:
 
 1. **Cell alignment.** Each raw matrix is reindexed to `adata.obs_names`.
    Rows are aligned to the benchmark cell index with `0.0` used for cells without an emitted score.
+   A non-empty matrix with no matching barcodes is rejected rather than
+   interpreted as an all-zero result.
 2. **Numeric coercion.** Numeric values are standardized and unavailable entries are represented as `0.0`.
 3. **LR naming.** LR names are normalized to `Ligand-Receptor` by replacing
    separators such as `^`, `_`, or `::` where needed.
 4. **Multi-receptor pairs.** For names such as `TGFB1-TGFBR1_TGFBR2`, the
-   manuscript loaders keep the first receptor for cross-method matching
-   (`TGFB1-TGFBR1`). Candidate matching also checks individual receptor
-   variants where needed.
+   public harmonizer keeps the first receptor (`TGFB1-TGFBR1`).
 5. **Duplicate columns.** If LR names become duplicated after normalization,
    columns are summed.
 6. **LR-pair coverage.** Pairs absent from a method output remain absent; each
    downstream metric records or skips them according to its documented rule.
 
-These choices make all downstream metrics operate on the same matrix shape and keep comparisons focused on method signal rather than file-format differences.
+These choices provide a common row index, LR naming convention, and numeric
+missing-value policy without claiming that every method emits the same LR set.
 
-## Method-specific raw files
+## Expected final handoff files
 
-The manuscript loaders read the following raw files.
+The shared evaluation loader expects the following final score matrices.
 
-| Method | Raw output pattern | Harmonization note |
+| Method | Final handoff pattern | Loader behavior or prerequisite |
 |---|---|---|
 | LIANA | `{sample}_spotxLR.csv` | Columns normalized with first-receptor matching. |
 | LARIS | `{sample}_prepare_CellByLR.csv` | `Ligand::Receptor` columns are converted to `Ligand-Receptor`. |
 | stLearn | `{sample}_SPOTxLR_lr_scores.csv` | Uses `spot_id` as index when present. |
 | StereoSiTE | `{sample}/{sample}_LR_intensity_matrix.csv` or `{sample}_LR_intensity_matrix.csv` | Supports nested and flat layouts. |
-| COMMOT | `{sample}/{sample}.csv` | Auto-detects index column. |
+| COMMOT | `{sample}/{sample}.csv` | Uses the first column as the cell/spot index. |
 | SPIDER | `{sample}/{sample}.csv` or first CSV in matched sample directory | Supports exact and suffix-matched sample directories. |
-| Spacia | `{sample}_cellxLR_spacia.csv` | Produced by aggregating Spacia per-interaction outputs. |
-| CellAgentChat | `{sample}/out/cell_receiving_scores_FINAL.csv` | Numeric row indices are replaced by `adata.obs_names` when row counts match. |
-| stCASE | `{sample}/{sample}.csv` | Auto-detects index column. |
+| Spacia | `{sample}_cellxLR_spacia.csv` | Per-interaction outputs must be aggregated before handoff. |
+| CellAgentChat | `{sample}/out/cell_receiving_scores_FINAL.csv` | The index must already contain cell barcodes; integer indices are not repaired by this loader. |
+| stCASE | `{sample}/{sample}.csv` | Uses the first column as the cell/spot index. |
 | SpaCcLink | `{sample}_ALL_LR_cellxLR.csv` or `{sample}_LR_scores.csv` | Converts first `_` separator to `-` when no hyphen is present. |
 
 ## Public adapter contract

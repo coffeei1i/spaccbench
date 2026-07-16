@@ -9,9 +9,10 @@ dataset:
 - Pre-computed pathway activity matrix (cells × pathways)
 - Species ("mouse" or "human")
 
-Small resources are packaged; prepared scenarios may be supplied through
-SPACCBENCH_DATA_DIR.
+Only small resources are packaged. Prepared scenario files must be supplied
+through SPACCBENCH_DATA_DIR.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -31,11 +32,11 @@ SCENARIO_REGISTRY: dict[str, dict[str, Any]] = {
         "platform": "MERFISH",
         "n_cells_expected": 9773,
         "files": {
-            "adata":     "tha.h5ad",
-            "top25":     "tha_top25.csv",
-            "gt":        "tha_gt_signal.parquet",
-            "pw_act":    "tha_pw_act.parquet",
-            "kegg":      "kegg_mouse.gmt",
+            "adata": "tha.h5ad",
+            "top25": "tha_top25.csv",
+            "gt": "tha_gt_signal.parquet",
+            "pw_act": "tha_pw_act.parquet",
+            "kegg": "kegg_mouse.gmt",
         },
     },
     "ctx": {
@@ -45,11 +46,11 @@ SCENARIO_REGISTRY: dict[str, dict[str, Any]] = {
         "platform": "MERFISH",
         "n_cells_expected": 9943,
         "files": {
-            "adata":     "ctx.h5ad",
-            "top25":     "ctx_top25.csv",
-            "gt":        "ctx_gt_signal.parquet",
-            "pw_act":    "ctx_pw_act.parquet",
-            "kegg":      "kegg_mouse.gmt",
+            "adata": "ctx.h5ad",
+            "top25": "ctx_top25.csv",
+            "gt": "ctx_gt_signal.parquet",
+            "pw_act": "ctx_pw_act.parquet",
+            "kegg": "kegg_mouse.gmt",
         },
     },
 }
@@ -58,28 +59,28 @@ SCENARIO_REGISTRY: dict[str, dict[str, Any]] = {
 @dataclass
 class Scenario:
     """Container for everything an ``evaluate`` call needs."""
+
     name: str
     title: str
     species: str
     platform: str
-    adata: Any                  # AnnData
-    top25_lr: list[str]         # lowercased ligand-receptor strings
-    top25_table: pd.DataFrame   # original top-25 CSV (with sender/receiver cell-type, scores, ...)
-    gt_signal: pd.DataFrame     # cells × top-25 LR reference signal E
-    pw_act: pd.DataFrame        # cells × pathways activity (GSVA)
-    kegg: pd.DataFrame          # long-format pathway-gene table
+    adata: Any  # AnnData
+    top25_lr: list[str]  # lowercased ligand-receptor strings
+    top25_table: pd.DataFrame  # original top-25 CSV (with sender/receiver cell-type, scores, ...)
+    gt_signal: pd.DataFrame  # cells × top-25 LR reference signal E
+    pw_act: pd.DataFrame  # cells × pathways activity (GSVA)
+    kegg: pd.DataFrame  # long-format pathway-gene table
 
     @property
     def coords(self) -> np.ndarray:
         """Return spatial coordinates from ``adata.obsm['spatial']``."""
         if "spatial" not in self.adata.obsm:
-            raise KeyError(
-                f"Scenario {self.name!r}: adata.obsm has no 'spatial' field."
-            )
+            raise KeyError(f"Scenario {self.name!r}: adata.obsm has no 'spatial' field.")
         return np.asarray(self.adata.obsm["spatial"], dtype=float)
 
 
 # ----- Data resolution --------------------------------------------------------
+
 
 def _resource_path(filename: str) -> Path:
     """Resolve a prepared scenario file from external or packaged data."""
@@ -95,8 +96,9 @@ def _resource_path(filename: str) -> Path:
 
 # ----- Public API -------------------------------------------------------------
 
+
 def list_scenarios() -> list[dict[str, Any]]:
-    """Return scenario metadata for all registered scenarios."""
+    """Return registered scenario metadata without checking data files."""
     return [
         {
             "name": meta["name"],
@@ -131,9 +133,7 @@ def load_scenario(name: str) -> Scenario:
         If one or more required prepared data files are missing.
     """
     if name not in SCENARIO_REGISTRY:
-        raise KeyError(
-            f"Unknown scenario {name!r}. Known: {sorted(SCENARIO_REGISTRY)}"
-        )
+        raise KeyError(f"Unknown scenario {name!r}. Known: {sorted(SCENARIO_REGISTRY)}")
     meta = SCENARIO_REGISTRY[name]
 
     # Lazy import: anndata is heavy.
@@ -153,9 +153,7 @@ def load_scenario(name: str) -> Scenario:
     elif {"ligand", "receptor"}.issubset(top25_table.columns):
         top25_lr = [
             f"{str(ligand).lower().strip()}-{str(receptor).lower().strip()}"
-            for ligand, receptor in zip(
-                top25_table["ligand"], top25_table["receptor"]
-            )
+            for ligand, receptor in zip(top25_table["ligand"], top25_table["receptor"])
         ]
     else:
         raise ValueError(
@@ -167,6 +165,7 @@ def load_scenario(name: str) -> Scenario:
     pw_act = _read_table(pw_act_path)
 
     from spaccbench.core.d4_pathway import load_gmt
+
     kegg = load_gmt(kegg_path)
 
     return Scenario(

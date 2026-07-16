@@ -36,27 +36,29 @@ SpaCCBench requires Python 3.9 or newer.
 A cohort-level geometric composite summarizes rank-normalized D1-D4 scores
 while penalizing uneven performance across dimensions.
 
-## Example manuscript results
+## Reported manuscript summaries
 
 ![Four-dimensional evaluation of ten spatial CCC methods on THA and CTX MERFISH](docs/figures/figure2.png)
 
 *Figure 2. Four-dimensional evaluation of ten spatial CCC methods on THA and CTX MERFISH.*
 
-Compact method-level results underlying the THA and CTX benchmark atlas are
+The compact method-level tables underlying the THA and CTX benchmark atlas are
 provided as [`THA_method_scores.csv`](examples/results/THA_method_scores.csv)
-and [`CTX_method_scores.csv`](examples/results/CTX_method_scores.csv). See the
-[results column guide](examples/results/README.md) for metric definitions. Large
-per-cell ligand-receptor score matrices remain outside Git.
+and [`CTX_method_scores.csv`](examples/results/CTX_method_scores.csv). These
+are static publication-facing summaries, not files generated during package
+installation or testing. See the [results column guide](examples/results/README.md)
+for metric definitions. Large per-cell ligand-receptor score matrices remain
+outside Git.
 
 ## Evaluating another method
 
-A method adapter returns a cells-by-LR pandas DataFrame:
-
-This is an integration example, not a no-data smoke test. The installed
-package includes the benchmark code and LR/pathway resources, but the large
-THA and CTX scenario bundles are kept outside Git. Build or obtain a scenario
-bundle as described in [`tools/README.md`](tools/README.md), then set
-`SPACCBENCH_DATA_DIR` before calling `evaluate` with a scenario name.
+The code below is an integration template, not a no-data example. It requires a
+prepared scenario bundle and a method score matrix whose cell barcodes match
+that scenario. The installed package includes the benchmark code and small
+LR/pathway resources, but not the THA/CTX scenario bundles or method outputs.
+Prepare the external files as described in
+[`tools/README.md`](tools/README.md), set `SPACCBENCH_DATA_DIR`, and return
+the final cells-by-LR matrix from an adapter.
 
 ~~~python
 import pandas as pd
@@ -82,19 +84,22 @@ result = evaluate(
 See docs/extending.md for the adapter contract and
 docs/output_harmonization.md for the common score-matrix format.
 
-## Reproducing the manuscript benchmark
+## Recomputing the shared D1-D4 evaluation
 
-The manuscript comparison starts from final cell-by-LR outputs produced by the
-ten evaluated methods. The shared SpaCCBench layer then applies identical D1-D4
-calculations to every method.
+The shared evaluation starts from final cell-by-LR outputs produced by the ten
+external methods. SpaCCBench applies the same D1-D4 implementation to those
+prepared matrices.
 
-- docs/method_runs.md records method versions and expected output files.
-- manuscript_scripts/run_benchmark.py evaluates harmonized outputs.
-- examples/README.md gives the expected directory layout.
-- docs/data_access.md maps scenarios to their public source datasets.
+- [`docs/method_runs.md`](docs/method_runs.md) records method versions and
+  expected handoff files.
+- [`manuscript_scripts/run_benchmark.py`](manuscript_scripts/run_benchmark.py)
+  recomputes metrics from prepared inputs.
+- [`examples/README.md`](examples/README.md) gives the expected directory layout.
+- [`docs/data_access.md`](docs/data_access.md) identifies the source datasets.
 
-Raw public spatial-transcriptomics data and large method output matrices are not
-duplicated in this Git repository.
+This repository does not run the external methods, download their inputs, or
+recreate manuscript figures. Raw datasets, prepared scenarios, and large method
+output matrices are not duplicated in Git.
 
 ## Citation
 
