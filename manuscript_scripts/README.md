@@ -28,7 +28,8 @@ incomplete exploratory run.
 - spaccbench_results.csv: raw D1-D4 metrics by method and scenario.
 - spaccbench_results_cohort.csv: rank scores and geometric composites.
 
-These are metric and cohort tables, not finished manuscript figures. This
-script does not download datasets, run external methods, or apply final figure
-formatting. Raw public datasets and large cell-level method outputs remain
-outside the Git repository.
+The script starts from prepared public-data scenarios and harmonized cell-level
+method outputs, then produces metric and cohort tables for downstream plotting
+and comparison. Dataset sources are documented in `docs/data_access.md`, and
+the expected method handoff files are documented in `docs/method_runs.md` and
+`examples/README.md`.

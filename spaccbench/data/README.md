@@ -10,10 +10,10 @@ The human LR table is a standalone resource; its presence does not indicate
 that a human evaluation scenario is registered in this package release.
 
 
-The LR tables are static benchmark resources. Their `sources` column records
-the contributing LR resources, and `n_sources` gives the corresponding count.
-This package does not rerun the upstream database-construction workflows.
-Columns are `ligand`, `receptor`, `n_sources`, and `sources`.
+The LR tables are versioned benchmark resources. Their `sources` column records
+the contributing LR resources, and `n_sources` gives the corresponding source
+count. The distributed tables therefore preserve the provenance used by the
+benchmark. Columns are `ligand`, `receptor`, `n_sources`, and `sources`.
 
 Large prepared scenario files are intentionally not versioned in Git. Put
 tha.h5ad, ctx.h5ad, their candidate tables, expression-reference matrices,

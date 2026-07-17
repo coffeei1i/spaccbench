@@ -89,7 +89,7 @@ def _summarise(result: dict) -> str:
         p_str = f"{d['perm_p']:.3g}" if d["perm_p"] == d["perm_p"] else "n/a"  # NaN check
         lines.append(
             f"D4 (pathway):   mean AUC={d['mean_auc']:.3f}  "
-            f"perm_p={p_str}  n_sig_lr={d['n_sig_lr']}"
+            f"perm_p={p_str}  n_auc_above_0_6={d['n_auc_above_0_6']}"
         )
     if result.get("composite_geo") is not None:
         lines.append(f"composite_geo = {result['composite_geo']:.3f}")

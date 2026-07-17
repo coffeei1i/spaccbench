@@ -1,8 +1,9 @@
 # Test suite
 
-The test suite validates the SpaCCBench evaluation framework with compact
-synthetic inputs. It does not rerun the ten external spatial CCC methods or
-reproduce their large per-cell outputs.
+The automated suite validates SpaCCBench metric implementations, adapters,
+resource packaging, metadata, and CLI behavior with compact synthetic inputs.
+Complete ten-method comparisons use the prepared handoff matrices documented
+in `docs/method_runs.md`.
 
 | Test file | What it checks |
 |---|---|
@@ -26,5 +27,5 @@ pytest tests/
 ```
 
 The manuscript-scale THA/CTX comparison is represented by the compact files in
-`examples/results/`; rerunning it requires the harmonized method outputs kept
-outside Git.
+`examples/results/`; metric recalculation uses the harmonized method outputs
+and prepared scenario bundles described in the repository documentation.

@@ -7,11 +7,11 @@ SPACCBENCH_DATA_DIR.
 ignored by Git; users must populate it with final external-method matrices.
 
 
-The shared evaluation notebook, `evaluate_all_methods_CTX_THA.ipynb`, runs
-the D1-D4 layer after both scenario bundles and all selected method outputs
-have been prepared. It does not download data, run the external methods, or
-construct their cell-by-LR matrices. Missing inputs are treated as errors in
-the complete ten-method workflow.
+The shared evaluation notebook, `evaluate_all_methods_CTX_THA.ipynb`, applies
+the D1-D4 framework to prepared THA and CTX scenario bundles and harmonized
+cell-by-LR outputs from the evaluated methods. It validates that every required
+input is available before producing the complete ten-method comparison, so
+missing inputs are reported as errors rather than silently omitted.
 
 ## Output layout
 

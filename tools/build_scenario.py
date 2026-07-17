@@ -2,11 +2,11 @@
 
 Produces (in ``--output-dir``):
 
-  <scenario>.h5ad                 — copy of the raw AnnData (cells × genes,
+  <scenario>.h5ad                 - copy of the raw AnnData (cells x genes,
                                     plus obsm['spatial'] and obs cell-type col).
-  <scenario>_top25.csv            — per-sample top-25 LR table.
-  <scenario>_gt_signal.parquet    — cells × 25 expression-derived reference E.
-  <scenario>_pw_act.parquet       — cells × pathways GSVA activity.
+  <scenario>_top25.csv            - per-sample top-25 LR table.
+  <scenario>_gt_signal.parquet    - cells x 25 expression-derived reference E.
+  <scenario>_pw_act.parquet       - cells x pathways GSVA activity.
 
 The expression-informed candidate ranking uses:
 
@@ -99,7 +99,7 @@ def select_top25(
     """Return (top25_table, gt_signal_matrix).
 
     top25_table columns: ligand, receptor, lr, n_sources, score, sender_celltype, receiver_celltype
-    gt_signal_matrix:    cells × top_n DataFrame with column names 'lig-rec' (lowercase)
+    gt_signal_matrix:    cells x top_n DataFrame with column names 'lig-rec' (lowercase)
     """
     # Symbol lookup index for genes (case-insensitive).
     var_idx = {str(g).lower(): g for g in adata.var_names}
@@ -196,7 +196,7 @@ def select_top25(
             stacklevel=2,
         )
 
-    # Build GT matrix (cells × top_n).
+    # Build GT matrix (cells x top_n).
     gt = pd.DataFrame(
         {lr: e_columns[lr] for lr in top25["lr"]},
         index=adata.obs_names,
@@ -205,7 +205,7 @@ def select_top25(
 
 
 def compute_pathway_activity(adata, kegg_path: Path) -> pd.DataFrame:
-    """Compute cells × pathways via decoupleR GSVA."""
+    """Compute cells x pathways via decoupleR GSVA."""
     try:
         import decoupler as dc
         import scanpy as sc

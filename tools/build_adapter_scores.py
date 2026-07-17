@@ -1,7 +1,7 @@
 """Build per-method adapter score matrices for SpaCCBench.
 
 Reads a final cell-by-LR CSV or parquet input and
-emits a clean cells × LR-pair parquet file consumable by
+emits a clean cells x LR-pair parquet file consumable by
 ``spaccbench.adapters.CsvBackedAdapter``.
 The tool standardizes a file; it does not register a method adapter. LIANA and
 COMMOT have built-in file-backed adapters. Other methods still require a
@@ -14,7 +14,7 @@ Output format:
   - Values: numeric per-cell scores; unavailable values are written as 0.0.
 
 Use ``--input-csv`` only when the method's final output already matches the
-cells × LR format. Convert method-specific raw directories with the method's
+cells x LR format. Convert method-specific raw directories with the method's
 own workflow before running this tool.
 """
 
@@ -39,7 +39,7 @@ def parse_args():
     p.add_argument("--method", required=True, help="Method name (e.g. LIANA, COMMOT)")
     p.add_argument("--scenario", required=True, help="Scenario name (e.g. tha, ctx)")
     p.add_argument(
-        "--input-csv", type=Path, required=True, help="Path to a cells × LR-pairs CSV (or parquet)"
+        "--input-csv", type=Path, required=True, help="Path to a cells x LR-pairs CSV (or parquet)"
     )
     p.add_argument(
         "--output-dir", required=True, type=Path, help="Output dir (typically spaccbench/data/)"

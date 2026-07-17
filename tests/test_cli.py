@@ -3,6 +3,8 @@
 import subprocess
 import sys
 
+from spaccbench.cli import _summarise
+
 
 def _run_cli(*args, expect_zero=True):
     """Invoke the CLI via the module so it works without pip-install in tests."""
@@ -73,3 +75,20 @@ def test_cli_list_methods_is_ascii_and_reports_current_status_terms():
     out.stdout.encode("ascii")
     assert "file-backed" in out.stdout
     assert "adapter-required" in out.stdout
+
+
+def test_cli_summary_names_auc_threshold_count_accurately():
+    summary = _summarise(
+        {
+            "method": "Example",
+            "scenario": "tha",
+            "d4": {
+                "mean_auc": 0.75,
+                "perm_p": 0.01,
+                "n_auc_above_0_6": 17,
+            },
+        }
+    )
+
+    assert "n_auc_above_0_6=17" in summary
+    assert "n_sig_lr" not in summary

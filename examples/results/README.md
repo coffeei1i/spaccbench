@@ -20,7 +20,8 @@ Column meanings:
 - `d1_rank_score` to `d4_rank_score`: within-scenario rank-normalized scores.
 - `composite_geo`: geometric mean of the four rank scores.
 
-The full per-cell ligand-receptor matrices are intentionally not duplicated in
-Git because they are large method outputs. The compact files here are sufficient
-to inspect, plot, and compare the reported method-level THA/CTX summaries, but
-not to rerun the benchmark.
+The compact files support direct inspection, plotting, and comparison of the
+reported method-level THA/CTX summaries. Recalculation of the D1-D4 metrics uses
+the prepared scenario bundles and cell-level method matrices described in the
+[example workflow](../README.md) and
+[data-access guide](../../docs/data_access.md).

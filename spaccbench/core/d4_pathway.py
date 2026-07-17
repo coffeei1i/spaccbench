@@ -260,7 +260,7 @@ def d4_pathway(
         - ``null_mean`` (float)
         - ``null_std`` (float)
         - ``n_lr`` (int)
-        - ``n_sig_lr`` (int, count of LR pairs with best_auc > 0.6)
+        - ``n_auc_above_0_6`` (int, count of LR pairs with best_auc > 0.6)
         - ``per_lr`` (pd.DataFrame)
     """
     rec_to_pw = receptor_to_pathways(kegg, max_pw=max_pw_per_receptor)
@@ -273,12 +273,12 @@ def d4_pathway(
             "null_mean": float("nan"),
             "null_std": float("nan"),
             "n_lr": 0,
-            "n_sig_lr": 0,
+            "n_auc_above_0_6": 0,
             "per_lr": per_lr,
         }
 
     obs_mean = float(per_lr["best_auc"].mean())
-    n_sig = int((per_lr["best_auc"] > 0.6).sum())
+    n_auc_above_0_6 = int((per_lr["best_auc"] > 0.6).sum())
 
     if n_perm > 0:
         rng = np.random.default_rng(seed)
@@ -311,6 +311,6 @@ def d4_pathway(
         "null_mean": null_mean,
         "null_std": null_std,
         "n_lr": int(len(per_lr)),
-        "n_sig_lr": n_sig,
+        "n_auc_above_0_6": n_auc_above_0_6,
         "per_lr": per_lr,
     }

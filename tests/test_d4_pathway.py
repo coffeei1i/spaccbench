@@ -77,6 +77,8 @@ def test_d4_full_pipeline_simple_case():
         seed=0,
     )
     assert out["n_lr"] == 1
+    assert out["n_auc_above_0_6"] == 1
+    assert "n_sig_lr" not in out
     assert out["mean_auc"] > 0.99  # perfect classifier
 
 
